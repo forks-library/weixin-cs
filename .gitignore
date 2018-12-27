@@ -1,2 +1,4 @@
-/ThinkPHP/config
+/ThinkPHP/Conf
 *.log
+/pic-wxpay/config.php
+/MP_verify_CCW13LP8O9YVzWe5.txt
