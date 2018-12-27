@@ -1,0 +1,47 @@
+{{if data}}
+<!--标题-->
+<div class="article-title inline-block">
+	<div class="article-title-txt">{{data.title}}</div>
+	<div class="article-title-time">设立时间：{{data.auditTime}}</div>
+</div>
+<!--活动主题-->
+<div class="article-cont">
+	<div class="project-theme">{{data.situation}}</div>
+</div>
+
+<!--项目明细-->
+<div class="donate-cont">
+	{{if data.startTime || data.endTime}}
+	<div class="donate-details bg-white">项目期限：<span>{{if data.startTime}}{{data.startTime}}起{{/if}}{{if data.endTime}}-{{data.endTime}}止{{/if}}</span></div>
+	{{/if}}
+	<div class="donate-details bg-white">目标金额：<span class="expenditure-color">{{data.targetAmount}}元</span></div>
+	<div class="donate-details bg-white">已筹款金额：<span class="income-color">{{data.hasAmount}}元</span></div>
+	<div class="donate-details bg-white">救助情况：<span>{{data.mission}}</span></div>
+</div>
+<!--捐助者名单-->
+<div class="aclick-btn marginb-08rem donor-namelist bg-white inline-block width100" data-url="et.redirect(et.url('user/donation/donorList', {no: '{{data.code}}'}));">
+	<div class="donor-namelist-head width100" >共{{data.helperCount}}位捐助者</div>
+	<div class="donor-namelist-ul">
+		<ul>
+			{{if data.topFive}}
+			{{each data.topFive as donater j}}
+			<li>
+				<img class="donor-picture" src="{{donater.imgUrl}}" alt="" />
+				<div class="donor-name ellipsis text-center">{{donater.nickName}}</div>
+			</li>
+			{{/each}}
+			{{/if}}
+		</ul>
+	</div>
+</div>
+<!--我要捐款、邀好友一起捐-->
+{{if data.runStatus == '1'}}
+<div class="i-need-donor width100">
+	<div class="aclick-btn color-white text-center size-l i-want-donor left" data-url="et.redirect(et.url('user/donation/payAction', {no: '{{data.code}}'}));">我要捐款</div>
+	<div class="color-white text-center size-l call-friend-donor  left">邀好友一起捐</div>
+</div>
+<div class="masking-page display-none masking-sharepage">
+	<i class="cfm-icon-share"></i>
+</div>
+{{/if}}
+{{/if}}

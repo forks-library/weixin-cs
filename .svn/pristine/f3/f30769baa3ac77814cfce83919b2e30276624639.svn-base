@@ -1,0 +1,125 @@
+<include file="../../Tpl/header" />
+<input type="hidden" class="appId" value="" />
+<input type="hidden" class="nonceStr" value="" />
+<input type="hidden" class="package" value="" />
+<input type="hidden" class="sign" value="" />
+<input type="hidden" class="signType" value="" />
+<input type="hidden" class="timeStamp" value="" />
+<!-- 没有数据时，隐藏封面 -->
+<section class="main-container block" style="padding-bottom:7.5rem; font-size:0px;">
+	<!-- 头部 -->
+	<div class="footpay-page-top width100">
+		<div class="footpay-page-header width100">
+			<img class="cf-icon-logo" src="__PUBLIC__/images/cf-icon-logo.png" alt="">
+		</div>
+		<!-- banner -->
+		<div class="footpay-banner">
+			<img class="width100 height100" src="__PUBLIC__/images/cfm-footpaybanner.jpg" alt="" />
+		</div>
+		<!-- 标题 -->
+		<div class="footpay-title inline-block">
+			<div class="footpay-title-txt width100"><?php echo $data["projectTitle"]?></div>
+			<div class="footpay-title-date width100">设立时间：<span><?php echo $data["startTime"]?></span></div>
+		</div>
+		<!--简介-->
+		<div class="footpay-intro">
+			<div class="footpay-intro-txt"><?php echo $data["explain"]?></div>
+		</div>
+		<!--第二个标题-->
+		<div class="footpay-second-title">我要捐款</div>
+	</div>
+	
+	<div class="article-cont inline-block">
+		<!--选择金额-->
+		<div class="footpay-choice-price width100">
+			<ul class="block">
+				<?php foreach($data["amountList"] as $key => $val) { ?>
+					<li class="face-value"><span><?php echo $val["amount"]?></span>元</li>
+				<?php } ?>
+				<!--li class="face-value"><span>10</span>元</li>
+				<li class="face-value"><span>20</span>元</li>
+				<li class="face-value"><span>50</span>元</li>
+				<li class="face-value"><span>100</span>元</li>
+				<li class="face-value"><span>2000</span>元</li-->
+			</ul>
+			
+			<div class="footpay-isname-radio">
+				<label class="isname-radio-label">
+					<input name="isname[]" id="isname1" class="radio-isname" type="radio" value="1" checked="checked" />匿名捐赠 
+				</label> 
+				<label class="isname-radio-label">
+					<input name="isname[]" id="isname2" class="radio-isname" type="radio" value="2" />实名捐赠
+				</label> 
+			</div>
+		</div>
+		
+		<!--div class="payment-project-name"><?php if (isset($title) && !empty($title)): echo $title; endif;?></div-->
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>支付金额</span>
+			</label>
+			<input class="input bg-white help-submit-input pay-amount" type="text" placeholder="自定义金额">
+		</div>
+		
+		<!-- 捐赠收据 -->
+		<div class="donation-receipt display-none">
+			<div class="donation-receipt-title relative">
+				<i class="donation-receipt-line"></i>
+				<div class="donation-receipt-txt">开具捐赠收据信息</div>
+			</div>
+
+			<div class="donation-receipt-msginput">
+				<label class="donation-receipt-label">
+					<span>捐赠人/单位</span>
+				</label>
+				<input class="input bg-white donation-receipt-input pay-company" type="text" placeholder="请输入您的姓名/单位全称">
+			</div>
+			<div class="donation-receipt-msginput">
+				<label class="donation-receipt-label">
+					<span>联系人</span>
+				</label>
+				<input class="input bg-white donation-receipt-input pay-conactor" type="text" placeholder="请输入联系人姓名">
+			</div>
+			<div class="donation-receipt-msginput">
+				<label class="donation-receipt-label">
+					<span>电话</span>
+				</label>
+				<input class="input bg-white donation-receipt-input pay-handy" type="text" placeholder="请输入联系人电话">
+			</div>
+		</div>
+		<!-- 慈善账户信息-->
+		<div class="account-msg">
+			<div class="donation-receipt-title relative">
+				<i class="donation-receipt-line"></i>
+				<div class="donation-receipt-txt">慈善账户信息</div>
+			</div>
+			<div class="donation-receipt-msginput">
+				<div class=" donation-receipt-input">可以通过银联捐赠到慈善会账户：</div>
+			</div>
+			<div class="donation-receipt-msginput" style="padding-left: 1rem;width: calc(100% - 1rem);">
+				<label class="donation-receipt-label">
+					<span>开户名称：</span>
+				</label>
+				<div class=" donation-receipt-input">东莞市慈善会</div>
+			</div>
+			<div class="donation-receipt-msginput" style="padding-left: 1rem;width: calc(100% - 1rem);">
+				<label class="donation-receipt-label">
+					<span>开户银行：</span>
+				</label>
+				<div class=" donation-receipt-input">东莞银行东城支行</div>
+			</div>
+			<div class="donation-receipt-msginput" style="padding-left: 1rem;width: calc(100% - 1rem);">
+				<label class="donation-receipt-label">
+					<span>开户账号：</span>
+				</label>
+				<div class=" donation-receipt-input">540000609111111</div>
+			</div>
+		</div>
+	</div>
+	<div class="footpav-action-btn">
+		<div class="confirm-pay footpav-action-button color-white text-center">确认支付</div>
+	</div>
+</section>
+<include file="../../Tpl/footOther" />
+<include file="../../Tpl/js" />
+<include file="../../Tpl/footer" />

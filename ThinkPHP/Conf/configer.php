@@ -1,0 +1,252 @@
+<?php
+/**
+ * 系统通用配置
+ */
+defined('THINK_PATH') or exit();
+define("SESSION_EXPIRE", 3600);
+define("SESSION_USER_LOGINED", "SESSION_USER_LOGINED");
+define("SESSION_STARTTIME", "SESSION_STARTTIME");
+define("SESSION_LOGIN_USER_ID", "SESSION_LOGIN_USER_ID");
+define("SESSION_LOGIN_USER", "SESSION_LOGIN_USER");
+define("SESSION_LOGIN_USER_NAME", "SESSION_LOGIN_USER_NAME");
+define("SESSION_LOGIN_USER_AUTH", "SESSION_LOGIN_USER_AUTH");
+define("SESSION_LOGIN_USER_PWD", "SESSION_LOGIN_USER_PWD");
+define("SESSION_PASSWORD_EXPIRE", "SESSION_PASSWORD_EXPIRE");
+define("SESSION_LOGIN_USER_COMP_CODE", "SESSION_LOGIN_USER_COMP_CODE");
+define("SESSION_ID_KEY", "SESSION_ID_");
+/**
+ * HTML定义
+ */
+define("HTML_ACTION_NAME", "action_name");
+define("HTML_VIEW_STATUS", "html_view_status");
+
+define("HTML_WEB_SPLIT_FLAG", "、");
+define("HTML_WEB_DATE_FLAG", "/");
+define("HTML_DB_SPLIT_FLAG", ",");
+/**
+ * Table
+ */
+define("HTML_TARGET", "html_target");
+define("HTML_TABLE_ID", "table_id");
+define("HTML_TABLE_VISIT", "table_visit");
+define("HTML_TABLE_ROWNUM_VISIT", "table_rownum_visit");
+define("HTML_TABLE_ROW_CHECK_VISIT", "table_row_check_visit");
+define("HTML_TABLE_OPERATION_VISIT", "table_operation_visit");
+define("HTML_TABLE_HEADER", "table_headers");
+define("HTML_TABLE_DATAS", "table_datas");
+define("HTML_TABLE_DETAIL", "table_details");
+define("HTML_TABLE_STYLE", "table_style");
+define("HTML_TABLE_TITLE", "table_title");
+define("HTML_TABLE_NEED_TITLE", "table_need_title");
+define("HTML_TABLE_DATA_ID", "table_data_id");
+define("HTML_TABLE_DETAIL_NO", "table_detail_no");
+define("HTML_TABLE_TREE_ROW_ID", "treetable_row_id");
+define("HTML_TABLE_ROW_PARAM", "table_row_param");
+define("HTML_TABLE_ROW_BTN_VIEW", "table_row_btn_view");
+define("HTML_TABLE_ROW_BTN_EDIT", "table_row_btn_edit");
+define("HTML_TABLE_ROW_BTN_DEL", "table_row_btn_del");
+define("HTML_TABLE_ROW_LIMIT", "table_row_limit");
+
+define("HTML_SEARCH_STATUS_HOLD", "search_status_hold");
+define("HTML_PAGINATION", "html_pagination");
+define("HTML_TARGET_URL", "target_url");
+define("HTML_DATA_VERSION", "data_version");
+define("HTML_DATA_LOAD", "data_load");
+/**
+ * 当前运行系统
+ */
+define("BACK_PART", "BACK_PART");
+define("FONT_PART", "FONT_PART");
+define("NONE_PART", "NONE_PART");
+/**
+ * 菜单栏
+ */
+defined('R_SYS_NAME') or define('R_SYS_NAME', '');
+define("R_SYS_MENU_VERSION", R_SYS_NAME."menu_version");
+define("R_SYS_MENU_URL", R_SYS_NAME."menu_url");
+define("R_SYS_MENU_ICON", R_SYS_NAME."menu_icon");
+define("R_SYS_MENU_NAME_ID", R_SYS_NAME."menu_name_id");
+define("R_SYS_MENU_ID_", R_SYS_NAME."menu_id_");
+define("R_SYS_MENU_PARENT_NAME_", R_SYS_NAME."menu_parent_name_");
+define("R_SYS_MENU_PARENT_NAME", R_SYS_NAME."menu_parent_name");
+defined('R_SYS_MENU_START') or define('R_SYS_MENU_START', '');
+/**
+ * 验证码
+ */
+define("VERIFY_CODE", "VERIFY-CODE");
+define("VERIFY_LENGTH", "VERIFY-LENGTH");
+define("VERIFY_STARTTIME", "VERIFY-STARTTIME");
+define("VERIFY_TIME", "VERIFY-TIME");
+/**
+ * for redis
+ */
+define("MAP_KEY", "-key");
+define("MAP_VAL", "-val");
+/**
+ * 系统操作模式
+ * 整体刷新: 1
+ * 局部刷新: 2
+ * 默认: 整体刷新
+ */
+if (!defined('SYS_OPT_MODE')) define('SYS_OPT_MODE', '1');
+define('SYS_OPT_MODE_WHOLE_REFRESH', '1');
+define('SYS_OPT_MODE_LOCAL_REFRESH', '2');
+if (SYS_OPT_MODE === SYS_OPT_MODE_LOCAL_REFRESH) {
+	if (!defined('LOCAL_REFRESH_HOMEPAGE')) exit('没有匹配主界面');
+}
+if (!defined('MODE_REFRESH_STARTPAGE')) define('MODE_REFRESH_STARTPAGE', 'home/index/index');
+/**
+ * for json
+ */
+define('JSON_RETCODE', 'retcode');
+define('JSON_MSG', 'msg');
+define('JSON_DATA', 'data');
+/**
+ * 短信验证发送接口专用
+ */
+define('MESSAGE_API_ID', 'b4b1b49705001142aaa221b015b909a1');
+/**
+ * 微信接口专用
+ */
+define('WEIXIN_APP_ID', 'wx7999eefe68b877c9');
+define('WEIXIN_APP_SECRET', '4683cb977b2de8ca2f5ced7f87d5a70e');
+define('WEIXIN_SHOP_ID', '1483146632');
+define('WEIXIN_API_KEY', 'dongguanshicishanhui076922222628');
+define('WEIXIN_NOTIFY_URL', 'http://wx.dgcf.org/pay/payvalid/valid');
+/**
+ * Express AppCode
+ */
+define("EXPRESS_APP_CODE", "89ac96f209e246fe8a6bb78f4b55b9fa");
+/**
+ * 微信接口专用
+ */
+define('WEIXIN_SILENT_CALLBACK_URL', 'http://weixin.mall126.com/wxint/simplewebauth/silent');
+define('WEIXIN_OPEN_CALLBACK_URL', 'http://weixin.mall126.com/wxint/simplewebauth/openId');
+define('WEIXIN_PAY_CENTER_URL', 'http://wxpay.mall126.com/weixin/payorder/payoff');
+/**
+ * 微信授权有效期
+ */
+define("WEIXIN_AUTH_VALIDATE_TIME", "1800");
+/**
+ * js通用路径
+ */
+define("HTTP_COMMON_JS", "http://js.itmato.com");
+define("HTTP_COMMON_CSS", "http://css.mall126.com");
+define("HTTP_DEBUG_JS", "http://js.itmato.com");
+define("HTTP_DEBUG_CSS", "http://debug.css.mall126.com");
+/**
+ * 外网代理服务
+// */
+//define("HTTP_PROXY", "192.168.1.226:3128");
+//define("HTTP_PPROXY_USERPWD", "lesky:Aiekd01428FFJO823r94ncslc023");
+/**
+ * 微信消息标题模版
+ */
+define("WX_PAY_SUBJECT", "东莞市慈善会");
+/**
+ * 荔枝故事公司编码
+ */
+define("LEECHEE_STORY_COMP_CODE", "101");
+/**
+ * Redis 集群
+ */
+define("REDIS_GROUP_HOST", "192.168.1.1");
+define("REDIS_GROUP_PORT", "6379");
+/**
+ * 系统金融类操作接口服务
+ */
+define("SEC_INTERFACE_SERVER", "http://secint.lt.in/");
+/**
+ * 系统Log操作接口服务
+ */
+define("LOG_DB_NAME", "ADMIN_DB");
+//define("LOG_INTERFACE_SERVER", "http://hclogger.lt.in/");
+/**
+ * 系统debug模式
+ */
+define("SYS_DEBUG_MODE", "1");
+/**
+ * cache配置
+ */
+define("CACHE_KEY_HEADER", "admin");
+/**
+ * 默认管理员用户名
+ */
+define('SYS_DEFAULT_ADMIN', 'admin');
+define('SYS_DEFAULT_ADMIN_NAME', '超级管理员');
+define('SYS_PART_NAME', "sysPartName");
+define('PARAM_KEY', 'weixin');
+define('SYS_VISIT_ERROR', false);
+/**
+ * 图片云端路径
+ */
+define('GLOBAL_FILE_SERVER', 'http://itmato-yusm.oss-cn-shenzhen.aliyuncs.com/');
+define("GLOBAL_IMGV_SERVER", "http://itmato-yusm.img-cn-shenzhen.aliyuncs.com/");
+define('GLOBAL_IMG_SERVER', 'https://files.ybizp.com/files/aliyunoss/imgSign');
+define('GLOBAL_IMG_DELETE', 'https://files.ybizp.com/files/image/delete');
+define('GLOBAL_IMG_BIND', 'https://files.ybizp.com/files/image/bind');
+define('GLOBAL_IMG_INFO', 'https://files.ybizp.com/files/aliyunoss/picInfo');
+define('GLOBAL_IMG_PATH', 'dgcishan');
+/**
+ * 违规图片替换链接
+ */
+define('GLOBAL_ILLEGAL_IMG_URL', 'http://leskymob.oss-cn-shenzhen.aliyuncs.com/hongchang/deleteprompt.png');
+/**
+ * 全局变量
+ */
+define("GLOBAL_CURRENT_USER_WXNM", "globalCurrentUserWxNm");
+define("GLOBAL_CURRENT_USER_WXID", "globalCurrentUserWxId");
+define("GLOBAL_CURRENT_USER_WXHU", "globalCurrentUserWxHu");
+/**
+ * 回退控制
+ */
+define("PAGE_BACK", "pageBack");
+/**
+ * 底部菜单控制
+ */
+define("MENU", "menu");
+define("MENU_HOME_PAGE", "menu_home_page");
+define("MENU_HOT_SELL", "menu_hot_sell");
+define("MENU_SHOP_CAR", "menu_shop_car");
+define("MENU_ME", "menu_me");
+/**
+ * Uni模块化配置
+ */
+define('MODULAR', 'modular');
+define('MODULAR_MENU', 'bottonMenu');
+define('MODULAR_MENU_LIST', 'lstBottonMenu');
+define('MODULAR_PART', 'modularPart');
+define('MODULAR_PART_LIST', 'lstModularPart');
+define('MODULAR_TITLE', 'modularTitle');
+define('MODULAR_SUBTITLE', 'modularSubTitle');
+define('MODULAR_TOP_BANNER', 'modularTopBanner');
+define('MODULAR_TOP_BANNER_DESCRIBE', 'modularTopBannerDescribe');
+/**
+ * 校园论坛
+ */
+define('UNI_MODULAR_FORUM', '校园论坛');
+define('UNI_MODULAR_FORUM_INTRODUCTION', '校园论坛介绍性文字');
+/**
+ * 个人中心
+ */
+define('UNI_MODULAR_UCENTER', '个人中心');
+define('UNI_MODULAR_UCENTER_INTRODUCTION', '个人中心介绍性文字');
+/**
+ * 任务中心
+ */
+define('UNI_MODULAR_TASK', '任务中心');
+define('UNI_MODULAR_TASK_INTRODUCTION', '任务中心介绍性文字');
+/**
+ * 二手市场/跳蚤市场
+ */
+define('UNI_MODULAR_SECONDHAND', '跳蚤市场');
+define('UNI_MODULAR_SECONDHAND_INTRODUCTION', '跳蚤市场介绍性文字');
+
+return  array(
+	'BACK_MANAGE' => 'admin'
+	,'WEB_MANAGE' => 'web'
+	,'WEB_TYPE'   => array(
+		'FRONT_NAME' => "前台"
+		,'BACK_NAME' => "后台"
+	)
+);

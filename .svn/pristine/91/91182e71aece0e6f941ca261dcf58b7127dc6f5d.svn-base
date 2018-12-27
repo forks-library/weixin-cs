@@ -1,0 +1,144 @@
+{{if data}}
+	<!--标题-->
+	{{if title}}
+	<div class="article-title inline-block">
+		<div class="article-title-txt">{{data.title}}</div>
+		<div class="article-title-time">设立时间：{{data.time}}</div>
+	</div>
+	{{/if}}
+	<div class="display-none state-for-help received-donations color-white">已通过，未发布</div>
+	<!--活动主题-->
+	<div class="article-cont inline-block">
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>姓名</span>
+			</label>
+			<input value="{{data.userName}}" class="help-people-name input bg-white help-submit-input" type="text" placeholder="请输入您的真实姓名">
+		</div>
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>身份证号</span>
+			</label>
+			<input value="{{data.idCard}}" class="help-people-cardnum input bg-white help-submit-input" type="number" placeholder="请输入您的有效身份证号码">
+		</div>
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>所属镇街</span>
+			</label>
+			{{if data.towns}}
+			<select class="input help-submit-msgselect" class="" name="" id="">
+				{{each data.towns as town i}}
+					{{if data.town == town}}
+						<option value="{{i}}" selected="selected">{{town}}</option>
+					{{else}}
+						<option value="{{i}}">{{town}}</option>
+					{{/if}}
+				{{/each}}
+			</select>
+			{{/if}}
+		</div>
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>户籍地址</span>
+			</label>
+			<input value="{{data.address}}" class="permanent-address input bg-white help-register-input" type="text" placeholder="请输入您的户籍地址">
+		</div>
+
+		<!--身份证上传-->
+		<div class="activity-file-upload">
+			<div class="file-upload-head relative">
+				<div class="file-upload-title">请上传身份证正反照片</div>
+				<i class="file-upload-line"></i>
+			</div>
+			<div class="activity-uploadfile-cont id-card-imgs">
+				{{if data.idCardPic}}
+					{{if data.idCardPic.length < 2}}
+						<div class="no-img-comp activity-uploadfile-btn" id="btnImgUpload">
+							<img class="width100 height100" src="{{data.defaultUploadPic}}" alt="" />
+						</div>
+					{{/if}}
+					{{each data.idCardPic as idImg i}}
+						<div class="have-img-comp activity-uploadfile-btn" id="btnImgUpload{{i}}">
+							<img class="useridcard-upload-img width100 height100" src="{{idImg}}">
+						</div>
+					{{/each}}
+				{{/if}}
+			</div>
+		</div>
+
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>联系电话</span>
+			</label>
+			<input value="{{data.mobile}}" class="contact-number input bg-white help-submit-input" type="number" placeholder="请输入您的座机或手机">
+		</div>
+		<div class="help-submit-msginput">
+			<label class="help-submit-label">
+				<span>救助原因</span>
+			</label>
+			<input value="{{data.helpReason}}" class="salvage-reason input bg-white help-submit-input" type="text" placeholder="请输入您的救助原因">
+		</div>
+
+		<div class="help-submit-msginput">
+			<label class="help-cost-label">
+				<span>已支付医疗费用(元)</span>
+			</label>
+			<input value="{{data.amountPaid}}" class="medical-expense input bg-white help-cost-input" type="number" placeholder="请输入金额">
+		</div>
+		<div class="help-submit-msginput">
+			<label class="help-cost-label">
+				<span>社保报销金额(元)</span>
+			</label>
+			<input value="{{data.reimburseAmount}}" class="social-security input bg-white help-cost-input" type="number" placeholder="请输入金额">
+		</div>
+		<!-- 其他受助情况 -->
+		<div class="other-help-msginput">
+			<div class="other-help-situation relative">
+				<div class="other-help-txt">其他受助情况</div>
+				<i class="other-help-line"></i>
+			</div>
+			<textarea class="other-recipients input bg-white other-help-textarea right" placeholder="没有填写其他受助情况">{{data.recipientStatus}}</textarea>
+		</div>
+
+		<div class="other-help-msginput">
+			<div class="other-help-situation relative">
+				<div class="other-help-txt">情况说明</div>
+				<i class="other-help-line"></i>
+			</div>
+			<textarea class="status-statement input bg-white other-help-textarea right" placeholder="请输入相关说明">{{data.situation}}</textarea>
+		</div>
+
+		<!--相关资料上传-->
+		<div class="activity-file-upload">
+			<div class="file-upload-head relative">
+				<div class="file-upload-title">相关资料上传</div>
+				<i class="file-upload-line"></i>
+			</div>
+			<div class="activity-uploadfile-cont other-info-imgs">
+				{{if data.detailPic}}
+					{{if data.detailPic.length < 10}}
+						<div class="upload-dataimg-btn activity-uploadfile-btn" id="btnDataImgUpload">
+							<img class="width100 height100" src="{{data.defaultUploadPic}}" alt="" />
+						</div>
+					{{/if}}
+					{{each data.detailPic as aboutImg i}}
+						<div class="have-dataimg-comp activity-uploadfile-btn" id="btnDataImgUpload{{i}}">
+							<img class="aboutdata-upload-img width100 height100" src="{{aboutImg}}" alt="" />
+						</div>
+					{{/each}}
+				{{/if}}
+			</div>
+		</div>
+		<!--慈善会反馈 -->
+		<div class="charitable-feedback other-help-msginput display-none">
+			<div class="other-help-situation relative">
+				<div class="other-help-txt">慈善会反馈</div>
+				<i class="other-help-line"></i>
+			</div>
+			<div class="activity-uploadremarks">{{data.missionExplain}}</div>
+		</div>		
+	</div>
+	<div class="want-help-page-btn">
+		<div class="want-help-page-button color-white text-center">提交</div>
+	</div>
+{{/if}}

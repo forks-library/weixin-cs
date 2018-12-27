@@ -1,0 +1,18 @@
+{{if data}}
+<!--标题-->
+<div class="article-twotitle relative">
+	<div class="article-twotitle-txt left" style="width:calc(100% - 4rem);">{{data.title}}</div>
+	{{if data.startTime}}
+	<div class="article-title-time">{{data.startTime}}</div>
+	{{/if}}
+	<div class="needhelp-details-btn aclick-btn" data-url="et.redirect(et.url('user/needhelp/detailMainCon', {no: '{{data.code}}'}))">详情>></div>
+</div>
+<div class="article-cont" style="padding-bottom: 0rem;">
+	<div class="size-l">{{data.detail}}</div>
+</div>
+{{if data.useStatus == '1'}}
+<div class="want-help-page-btn">
+	<div class="aclick-btn want-help-page-button color-white text-center" data-url="et.redirect(et.url('user/needhelp/helpAction', {no: '{{data.code}}'}));">我要求助</div>
+</div>
+{{/if}}
+{{/if}}

@@ -1,0 +1,17 @@
+{{if datas}}
+{{each datas as help i}}
+<li class="aclick-btn" data-url="et.redirect(et.url('user/needhelp/detail', {no: '{{help.code}}'}));">
+	<div class="want-help-img">
+		<img class="width100 height100" src="{{help.displayPic}}" alt="">
+	</div>
+	<div class="want-help-cont relative">
+		<div class="want-help-title ellipsis">{{help.title}}</div>
+		<div class="want-help-detail"><span>适用范围：</span>{{help.detail}}</div>
+		<div class="wantdonate-list-bottom">
+			<!-- <div class="want-help-condition ellipsis">救助条件：{{help.condition}}</div> -->
+			<div class="want-help-details-btn color-white">申请救助</div>
+		</div>
+	</div>
+</li>
+{{/each}}
+{{/if}}

@@ -1,0 +1,15 @@
+
+<!--标题-->
+<div class="article-twotitle inline-block">
+	<div class="article-twotitle-txt">我申请的活动</div>
+	<div class="article-title-time">设立时间：{{data.auditTime}}</div>
+</div>
+<!--活动主题-->
+<div class="article-cont marginb-05rem">
+	<div class="project-theme">活动主题：{{data.note}}。</div>
+</div>
+
+<!--慈善会反馈-->
+{{if data.feedBack}}
+<div class="cf-feedback bg-white">慈善会反馈：<span>{{data.feedBack}}</span></div>
+{{/if}}

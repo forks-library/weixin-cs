@@ -1,0 +1,9 @@
+{{if datas}}
+<div class="footpay-choice-price width100">
+	<ul class="block" style="width:100%;">
+		{{each datas as item i}}
+		<li class="face-value" style="width: 22%;"><span>{{item.amount}}</span>元</li>
+		{{/each}}
+	</ul>
+</div>
+{{/if}}

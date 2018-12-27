@@ -1,0 +1,610 @@
+<?php
+namespace Com\Mor\Model\Sys;
+use Com\Mor\Model\VersionModel;
+use Com\Mor\Util\EncodeUtil;
+use Com\Mor\Util\JsonUtil;
+use Com\Mor\Util\ImgUtil;
+use Com\Mor\Model\Sys\MtHelpPicModel;
+use Com\Mor\Model\Sys\MtHelpOrderModel;
+use Com\Mor\Model\Sys\MtLeaveWordModel;
+use Com\Mor\Model\Weixin\WxUserResourceModel;
+
+class MtHelpInformationModel extends VersionModel {
+	
+	public function getTopHelpInfo() {
+		$topHelpType = array();
+		
+		$where = " c.is_top = '1' ";
+		
+		$field   = array();
+		$field[] = "c.help_code";
+		$field[] = "c.help_title";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$topHelpType["code"]  = $data["help_code"];
+			$topHelpType["title"] = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"]));
+		}
+		
+		return $topHelpType;
+	}
+	
+	public function getAllHelpInformation($orderType, $searchText = "", $page = 1) {
+		$helpInformation = array();
+		
+		$order = "";
+		$where = " c.status = '3' ";
+		
+		$field   = array();
+		$field[] = "c.help_code";
+		$field[] = "c.help_title";
+		$field[] = "c.raise_money";
+		$field[] = "ifnull(c.display_pic, '') as display_pic";
+		$field[] = "ifnull(c.funds_use, '') as funds_use";
+		$field[] = "ifnull(c.situation_explain, '') as situation_explain";
+		$field[] = "ifnull(c.audit_time, 0) as audit_time";
+		$field[] = "ifnull(c.already_money, 0) as already_money";
+		
+		if (!empty($searchText)) {
+			$name   = $this->fetchUnicodeSql(EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($searchText)));
+//			$name   = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($searchText));
+			$where .= " and c.help_title ".$name." ";
+		}
+		
+		if (!empty($orderType)) {
+			if (intval($orderType) === 1) {
+				$order = "c.seq desc, c.already_money desc, c.audit_time desc";
+			} else if (intval($orderType) === 2) {
+				$order = "c.seq desc, c.audit_time desc";
+			} else {
+				$order = "c.".$this->getPk();
+			}
+		} else {
+			$order = "c.".$this->getPk();
+		}
+		
+		$total     = $this->countAll($where);
+		$totalPage = $this->countPage($total);
+		
+		$this->setLimit($page);
+		$datas = $this->where($where)->order($order)->getField($field);
+		
+		if (!empty($datas) && is_array($datas)) {
+			$mtHelpOrderModel = new MtHelpOrderModel();
+			
+			foreach ($datas as $k1 => $data) {
+				$helpMation = array();
+				$helpMation["code"]         = $data["help_code"];
+				$helpMation["title"]        = !empty($data["help_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"])) : "-";
+				$helpMation["fundsUse"]     = !empty($data["funds_use"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["funds_use"])) : "-";
+				$helpMation["targetAmount"] = $data["raise_money"]." 元";
+				$helpMation["hasAmount"]    = $data["already_money"]." 元";
+				$helpMation["helperCount"]  = $mtHelpOrderModel->countOrderByHelpCode($data["help_code"]);
+				$helpMation["displayPic"]   = !empty($data["display_pic"]) ? ImgUtil::imgHandy(urldecode($data["display_pic"]), "320") : "";
+				$helpMation["situation"]    = !empty($data["situation_explain"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["situation_explain"])) : "";
+				$helpMation["startTime"]    = !empty($data["audit_time"]) ? date("Y-m-d", $data["audit_time"]) : "";
+				
+				$helpInformation[] = $helpMation;
+			}
+		}
+		
+		return $helpInformation;
+	}
+	
+	public function getHelpInformationDetail($id) {
+		$helpMation = array();
+	
+		if (!empty($id)) {
+			$where = " c.help_code = '".$id."' and c.status = '3' ";
+			
+			$field   = array();
+			$field[] = "c.help_code";
+			$field[] = "c.help_title";
+			$field[] = "c.raise_money";
+			$field[] = "ifnull(c.display_pic, '') as display_pic";
+			$field[] = "ifnull(c.situation_explain, '') as situation_explain";
+			$field[] = "ifnull(c.mission_explain, '') as mission_explain";
+			$field[] = "ifnull(c.audit_time, 0) as audit_time";
+			$field[] = "ifnull(c.start_time, 0) as start_time";
+			$field[] = "ifnull(c.end_time, 0) as end_time";
+			$field[] = "ifnull(c.already_money, 0) as already_money";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$mtHelpOrderModel = new MtHelpOrderModel();
+				$mtLeaveWordModel = new MtLeaveWordModel();
+				
+				$helpMation["code"]         = $data["help_code"];
+				$helpMation["title"]        = !empty($data["help_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"])) : "-";
+				$helpMation["targetAmount"] = $data["raise_money"];
+				$helpMation["hasAmount"]    = $data["already_money"];
+				$helpMation["helperCount"]  = $mtHelpOrderModel->countOrderByHelpCode($data["help_code"]);
+				$helpMation["displayPic"]   = !empty($data["display_pic"]) ? urldecode($data["display_pic"]) : "";
+				$helpMation["situation"]    = !empty($data["situation_explain"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["situation_explain"])) : "";
+				$helpMation["auditTime"]    = !empty($data["audit_time"]) ? date("Y-m-d", $data["audit_time"]) : "";
+				$helpMation["startTime"]    = !empty($data["start_time"]) ? date("Y-m-d", $data["start_time"]) : "";
+				$helpMation["endTime"]      = !empty($data["end_time"]) ? date("Y-m-d", $data["end_time"]) : "";
+				$helpMation["topFive"]      = $mtHelpOrderModel->getTopFiveDonater($data["help_code"]);
+				$helpMation["twoLeave"]     = $mtLeaveWordModel->getTwoLeaves($data["help_code"]);
+				$helpMation["mission"]      = !empty($data["mission_explain"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["mission_explain"])) : "-";
+				
+				if (!empty($data["end_time"])) {
+					if (strtotime(date("Y-m-d", $data["end_time"])) < strtotime(date("Y-m-d"))) {
+						$helpMation["runStatus"] = "0";
+					} else {
+						$helpMation["runStatus"] = "1";
+					}
+				} else {
+					$helpMation["runStatus"] = "1";
+				}
+			}
+		}
+		
+		return $helpMation;
+	}
+	
+	public function getHelpInformationTitle($id) {
+		$title = "";
+		
+		if (!empty($id)) {
+			$where   = " c.help_code = '".$id."' ";
+			
+			$field   = array();
+			$field[] = "c.help_title";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$title = !empty($data["help_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"])) : "-";
+			}
+		}
+		
+		return $title;
+	}
+	
+	public function updMessageStatus($helpCode, $userId) {
+		$blnSucc = false;
+		
+		if (!empty($helpCode) && !empty($userId)) {
+			$where = " c.help_code = '".$helpCode."' and c.user_wx_id = '".$userId."' ";
+			
+			$field = array();
+			$field[] = "c.".$this->getPk();
+			$field[] = "ifnull(c.is_message, 0) as is_message";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && !empty($data["is_message"]) && intval($data["is_message"]) === 1) {
+				try {
+					$this->startTrans();
+					
+					$id   = $data[$this->getPk()];
+					
+					$data = array();
+					$data["is_message"] = 0;
+					
+					$r1 = $this->where($this->getPk()." = '".$id."'")->save($data);
+					
+					if ($r1 !== false) {
+						$this->commit();
+						$blnSucc = true;
+					} else {
+						$this->rollback();
+					}
+				} catch (\Exception $e) {
+					$this->rollback();
+					JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+				}
+			}
+		}
+		
+		return $blnSucc;
+	}
+	
+	public function updAlreadyMoney($helpCode, $alreadyMoney) {
+		$blnSucc = false;
+		
+		if (!empty($helpCode) && !empty($alreadyMoney) && is_numeric($alreadyMoney)) {
+			$where = " c.help_code = '".$helpCode."' ";
+			
+			$field  = array();
+			$field[]= "c.".$this->getPk();
+			$field[]= "ifnull(c.already_money, 0) as already_money";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$id = $data[$this->getPk()];
+				$am = floatval(sprintf("%.2f", $data["already_money"]));
+				
+				$data = array();
+				$data["already_money"] = $am + floatval(sprintf("%.2f", $alreadyMoney));
+				
+				$this->where($this->getPk()." = '".$id."'")->field($this->getPk())->lock(true)->find();
+				$r1 = $this->where($this->getPk()." = '".$id."'")->save($data);
+				
+				if ($r1 !== false) {
+					$blnSucc = true;
+				}
+			}
+		}
+		
+		return $blnSucc;
+	}
+	
+	public function addInformation($addArr) {
+//		$userId, $helpType, $helpNm, $helpId, $helpAddr, $handy, $reason, $medicalExpense, $socialSecurity, $otherRecipients, $statusStatement, $town, $idcardImg, $aboutDataImg
+		$blnSucc  = false;
+		$idCard   = array();
+		$mationPic= array();
+		$picModel = new MtHelpPicModel();
+		$dbData   = array();
+		
+		if (!empty($addArr["userId"])) {
+			$dbData["user_wx_id"]       = $addArr["userId"];
+		}
+		if (!empty($addArr["helpType"])) {
+			$dbData["help_type"]        = $addArr["helpType"];
+		}
+		if (!empty($addArr["helpNm"])) {
+			$dbData["user_name"]       	= EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($addArr["helpNm"]));
+		}
+		if (!empty($addArr["helpId"])) {
+			$dbData["id_card"]      	= $addArr["helpId"];
+		}
+		if (!empty($addArr["helpAddr"])) {
+			$dbData["domicile_address"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($addArr["helpAddr"]));
+		}
+		if (!empty($addArr["handy"])) {
+			$dbData["mobile"]           = $addArr["handy"];
+		}
+		if (!empty($addArr["town"])) {
+			$dbData["town_street"]      = $addArr["town"];
+		}
+		if (!empty($addArr["reason"])) {
+			$dbData["help_reason"]      = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($addArr["reason"]));
+		}
+		if (!empty($addArr["medicalExpense"])) {
+			$dbData["amount_paid"]      = $addArr["medicalExpense"];
+		}
+		if (!empty($addArr["socialSecurity"])) {
+			$dbData["reimburse_amount"] = $addArr["socialSecurity"];
+		}
+		if (!empty($addArr["otherRecipients"])) {
+			$dbData["recipient_status"] = !empty($addArr["otherRecipients"]) ? EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($addArr["otherRecipients"])) : "";
+		}
+		if (!empty($addArr["statusStatement"])) {
+			$dbData["situation_explain"]= EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($addArr["statusStatement"]));
+		}
+		
+		$dbData["help_code"]        = $this->generateHelpCode();
+		$dbData["status"]           = "1";
+		$dbData["is_message"]       = "1";
+		
+		
+		
+		
+		/*$dbData["help_type"]        = $helpType;
+		$dbData["user_name"]        = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($helpNm));
+		$dbData["id_card"]          = $helpId;
+		$dbData["domicile_address"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($helpAddr));
+		$dbData["mobile"]           = $handy;
+		$dbData["town_street"]      = $town;
+		$dbData["amount_paid"]      = $medicalExpense;
+		$dbData["reimburse_amount"] = $socialSecurity;
+		$dbData["help_reason"]      = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($reason));
+		$dbData["recipient_status"] = !empty($otherRecipients) ? EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($otherRecipients)) : "";
+		$dbData["situation_explain"]= EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($statusStatement));
+		$dbData["help_code"]        = $this->generateHelpCode();
+		$dbData["status"]           = "1";
+		$dbData["is_message"]       = "1";*/
+		
+		if (!empty($addArr["idcardImg"])) {
+			// 包含多张图片
+			if (strpos($addArr["idcardImg"], "|") !== false) {
+				$idCard   = explode("|", $addArr["idcardImg"]);
+			} else {
+				$idCard[] = $addArr["idcardImg"];
+			}
+		}
+		
+		if (!empty($addArr['aboutDataImg'])) {
+			// 包含多张图片
+			if (strpos($addArr['aboutDataImg'], "|") !== false) {
+				$mationPic   = explode("|", $addArr['aboutDataImg']);
+			} else {
+				$mationPic[] = $addArr['aboutDataImg'];
+			}
+		}
+	
+		try {
+			$bln = true;
+			$this->startTrans();
+			
+			if (!empty($idCard) && is_array($idCard)) {
+				$bln = $picModel->addIdCardPic($dbData["help_code"], $idCard);
+			} 
+				
+			if (!empty($mationPic) && is_array($mationPic)) {
+				$bln = $picModel->addDetailPic($dbData["help_code"], $mationPic);
+			} 
+			
+			if ($bln !== false) {
+				$id = $this->data($dbData)->add();
+			} else {
+				$id = false;
+			}
+			
+			if ($id !== false) {
+				$this->commit();
+				$blnSucc = true;
+			} else {
+				$this->rollback();
+			}
+		} catch (\Exception $e) {
+			$this->rollback();
+			JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+		}
+		
+		return $blnSucc;
+	}
+	
+	public function updInformation($infoNo, $helpNm, $helpId, $helpAddr, $handy, $reason, $medicalExpense, $socialSecurity, $otherRecipients, $statusStatement, $town, $idcardImg, $aboutDataImg) {
+		$blnSucc = false;
+		
+		if (!empty($infoNo)) {
+			$idCard   = array();
+			$mationPic= array();
+			$picModel = new MtHelpPicModel();
+			
+			$field = array();
+			$field[] = "c.".$this->getPk();
+			
+			$data = $this->where(" c.help_code = '".$infoNo."' ")->field($field)->find();
+			
+			if (!empty($data) && is_array($data) && !empty($data[$this->getPk()])) {
+				$id = $data[$this->getPk()];
+				
+				$dbData = array();
+				$dbData["user_name"]        = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($helpNm));
+				$dbData["id_card"]          = $helpId;
+				$dbData["domicile_address"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($helpAddr));
+				$dbData["mobile"]           = $handy;
+				$dbData["town_street"]      = $town;
+				$dbData["amount_paid"]      = $medicalExpense;
+				$dbData["reimburse_amount"] = $socialSecurity;
+				$dbData["help_reason"]      = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($reason));
+				$dbData["recipient_status"] = !empty($otherRecipients) ? EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($otherRecipients)) : "";
+				$dbData["situation_explain"]= EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($statusStatement));
+				$dbData["status"]           = "1";
+				
+				if (!empty($idcardImg)) {
+					// 包含多张图片
+					if (strpos($idcardImg, "|") !== false) {
+						$idCard   = explode("|", $idcardImg);
+					} else {
+						$idCard[] = $idcardImg;
+					}
+				}
+				
+				if (!empty($aboutDataImg)) {
+					// 包含多张图片
+					if (strpos($aboutDataImg, "|") !== false) {
+						$mationPic   = explode("|", $aboutDataImg);
+					} else {
+						$mationPic[] = $aboutDataImg;
+					}
+				}
+				
+				try {
+					$bln = false;
+					$this->startTrans();
+					
+					if (!empty($idCard) && is_array($idCard)) {
+						$bln = $picModel->addIdCardPic($infoNo, $idCard);
+					} else {
+						$bln = false;
+					}
+						
+					if ($bln !== false && !empty($mationPic) && is_array($mationPic)) {
+						$bln = $picModel->addDetailPic($infoNo, $mationPic);
+					} else {
+						$bln = false;
+					}
+					
+					if ($bln !== false) {
+						$id = $this->where($this->getPk()." = '".$id."'")->save($dbData);
+					} else {
+						$id = false;
+					}
+					
+					if ($id !== false) {
+						$this->commit();
+						$blnSucc = true;
+					} else {
+						$this->rollback();
+					}
+				} catch (\Exception $e) {
+					$this->rollback();
+					JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+				}
+			}
+		}
+		
+		return $blnSucc;
+	}
+	
+	protected function generateHelpCode() {
+		$code = "120".$this->generateRandomTime(true, 10);
+		
+		if (!empty($code)) {
+			try {
+				$where = " c.help_code = '".$code."' ";
+				$count = $this->where($where)->count();
+				
+				if (intval($count) > 0) {
+					$code = $this->generateHelpCode();
+				}
+			} catch (\Exception $e) {
+				$code = "";
+			}
+		}
+		
+		return $code;
+	}
+	
+	public function getSeekHelpProject($userId, $page = 1) {
+		$projects = array();
+		
+		if (!empty($userId)) {
+			$where   = " 1 = 1 and c.user_wx_id = '".$userId."' ";
+			
+			$field   = array();
+			$field[] = "c.".$this->getPk();
+			$field[] = "mht.help_title";
+			$field[] = "ifnull(c.help_title, '') as title";
+			$field[] = "c.help_code";
+			$field[] = "c.status";
+			$field[] = "c.is_message";
+			
+			$join = " left join mt_help_type mht on mht.help_type_code = c.help_type ";
+			
+			$this->join($join);
+			$total     = $this->countAll($where);
+	    	$totalPage = $this->countPage($total);
+
+	    	$this->setLimit($page);
+			$this->join($join);
+			$datas = $this->where($where)->order($this->getPk()." asc")->getField($field);
+			
+			$where = " c.user_wx_id = '".$userId."' and c.is_message = '1' and c.deleted = '0' ";
+			$this->join($join);
+			$count = $this->where($where)->count();
+			
+			if (!empty($datas) && is_array($datas)) {
+				foreach ($datas as $k1 => $data) {
+					$project = array();
+					
+					$project["helpCode"]  = $data["help_code"];
+					$project["status"]    = $data["status"];
+					$project["isMessage"] = $data["is_message"];
+					$project["helpTitle"] = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"]));
+					$project["title"]     = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["title"]));
+					
+					$projects[] = $project;
+				}
+			}
+		}
+		
+		return array("list" => $projects, "hasMessage" => $count > 0 ? "true" : "false");
+	}
+	
+	public function getSeekDetail($helpCode) {
+		$helpMation = array();
+		$townStreet = $this->dgTownData();
+		
+		if (!empty($helpCode)) {
+			$where   = " c.help_code = '".$helpCode."' ";
+			
+			$field   = array();
+			$field[] = "c.id_card";
+			$field[] = "c.user_name";
+			$field[] = "c.help_code";
+			$field[] = "c.town_street";
+			$field[] = "c.status";
+			$field[] = "c.mobile";
+			$field[] = "ifnull(c.help_reason, 0) as help_reason";
+			$field[] = "ifnull(c.domicile_address, '') as domicile_address";
+			$field[] = "ifnull(c.situation_explain, '') as situation_explain";
+			$field[] = "ifnull(c.recipient_status, '') as recipient_status";
+			$field[] = "ifnull(c.mission_explain, 0) as mission_explain";
+			$field[] = "ifnull(c.reimburse_amount, 0) as reimburse_amount";
+			$field[] = "ifnull(c.amount_paid, 0) as amount_paid";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$picModel = new MtHelpPicModel();
+				
+				$helpMation["code"]             = $data["help_code"];
+				$helpMation["town"]             = $townStreet[$data["town_street"]];
+				$helpMation["mobile"]           = $data["mobile"];
+				$helpMation["status"]           = $data["status"];
+				$helpMation["address"]          = !empty($data["domicile_address"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["domicile_address"])) : "-";
+				$helpMation["idCard"]           = $data["id_card"];
+				$helpMation["userName"]         = !empty($data["user_name"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["user_name"])) : "-";
+				$helpMation["reimburseAmount"]  = $data["reimburse_amount"];
+				$helpMation["amountPaid"]       = $data["amount_paid"];
+				$helpMation["helpReason"]       = !empty($data["help_reason"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_reason"])) : "";
+				$helpMation["situation"]        = !empty($data["situation_explain"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["situation_explain"])) : "";
+				$helpMation["missionExplain"]   = !empty($data["mission_explain"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["mission_explain"])) : "";
+				$helpMation["recipientStatus"]  = !empty($data["recipient_status"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["recipient_status"])) : "";
+				
+				list($detailPic, $idCard) = $picModel->findHelpPicList($helpCode);
+				
+				if (!empty($idCard) && is_array($idCard)) {
+					$idPic = array();
+					foreach($idCard as $key => $val) {
+						$idPic[] = ImgUtil::imgHandy($val, "320");
+					}
+					$helpMation["idCardPic"] = $idPic;
+				}
+				
+				if (!empty($detailPic) && is_array($detailPic)) {
+					$mationPic =array();
+					foreach($detailPic as $key => $val) {
+						$mationPic[] = ImgUtil::imgHandy($val, "320");
+					}
+					$helpMation["detailPic"] = $mationPic;
+				}
+				
+				$helpMation["towns"] = $this->dgTownData();
+			}
+		}
+		
+		return $helpMation;
+	}
+	
+	protected function dgTownData() {
+		$data = array();
+		
+		$data["100"] =  "莞城";
+		$data["101"] =  "南城";
+		$data["102"] =  "东城";
+		$data["103"] =  "万江";
+		$data["104"] =  "石碣";
+		$data["105"] =  "石龙";
+		$data["106"] =  "茶山";
+		$data["107"] =  "石排";
+		$data["108"] =  "企石";
+		$data["109"] =  "横沥";
+		$data["110"] =  "桥头";
+		$data["111"] =  "谢岗";
+		$data["112"] =  "东坑";
+		$data["113"] =  "常平";
+		$data["114"] =  "寮步";
+		$data["115"] =  "大朗";
+		$data["116"] =  "黄江";
+		$data["117"] =  "清溪";
+		$data["118"] =  "塘厦";
+		$data["119"] =  "凤岗";
+		$data["120"] =  "长安";
+		$data["121"] =  "虎门";
+		$data["122"] =  "厚街";
+		$data["123"] =  "沙田";
+		$data["124"] =  "道滘";
+		$data["125"] =  "洪梅";
+		$data["126"] =  "麻涌";
+		$data["127"] =  "中堂";
+		$data["128"] =  "高埗";
+		$data["129"] = "樟木头";
+		$data["130"] = "大岭山";
+		$data["131"] = "望牛墩";
+		
+		return $data;
+	}
+	
+}
+?>

@@ -1,0 +1,8 @@
+require(["template", "page", "lazyload", "swiper"], function(templateObj) {
+	// 图片划动
+	$(".index-banner").Swipe({auto: 3000});
+	
+	if (et.loadingLayer && et.loadingLayer.initLoading) {
+		et.loadingLayer.initLoading.stop();
+	}
+});

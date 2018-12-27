@@ -1,0 +1,9 @@
+{{if data}}
+<!--标题-->
+<div class="article-twotitle relative">
+	<div class="article-twotitle-txt text-center">{{data.title}}</div>
+</div>
+<div class="article-cont" style="padding-bottom: 0rem;">
+	<div class="size-l">{{data.summary}}</div>
+</div>
+{{/if}}

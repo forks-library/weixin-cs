@@ -1,0 +1,24 @@
+{{if datas}}
+{{each datas as donation i}}
+<li class="aclick-btn bg-white" data-url="et.redirect(et.url('user/donation/detail', {no: '{{donation.code}}'}));">
+	<div class="wantdonate-li-img left">
+		<img class="width100 height100" src="{{donation.displayPic}}" alt="">
+	</div>
+	<div class="wantdonate-li-cont relative">
+		<div class="wantdonate-li-title ellipsis_two width100">{{donation.title}}</div>
+		<div class="wantdonate-li-situation ellipsis_two width100"><span>款项用途：</span>{{donation.fundsUse}}</div>
+		<!--<div class="wantdonate-li-situation ellipsis_two width100"><span>款项用途：</span>{{donation.situation}}</div> -->
+		<!--<div class="width100 wantdonate-li-price">
+			 <div class="ellipsis color-greyblcak">已筹金额：<span class="income-color">{{donation.hasAmount}}</span></div>
+		</div>
+		<div class="width100 wantdonate-li-price">
+			<div class="ellipsis color-greyblcak">目标金额：<span class="expenditure-color">{{donation.targetAmount}}</span></div>
+		</div> -->
+		<div class="wantdonate-list-bottom">
+			<!-- <div class="contributor-num">共有{{donation.helperCount}}名捐款者</div> -->
+			<div class="situation-cont-btn">点击捐款</div>
+		</div>
+	</div>
+</li>
+{{/each}}
+{{/if}}

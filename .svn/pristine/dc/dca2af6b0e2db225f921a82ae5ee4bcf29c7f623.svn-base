@@ -1,0 +1,394 @@
+<?php
+namespace Com\Mor\Controller;
+use Think\Controller;
+use Com\Mor\Model\Weixin\WxAppModel;
+use Com\Mor\Util\WebUtil;
+use Com\Mor\Util\JsonUtil;
+use Com\Mor\Util\ModeUtil;
+use Com\Mor\Util\StringUtil;
+use Com\Mor\Util\ArrayUtil;
+use Com\Mor\Util\EncodeUtil;
+use Com\Mor\Manage\WeiXinManage;
+use Com\Mor\Model\Weixin\WxTokenModel;
+use Com\Mor\Model\Weixin\WxTicketModel;
+use Com\Mor\Model\Weixin\WxUserResourceModel;
+
+class WeixinController extends Controller {
+	
+	protected $isDebug       = ON_LINE ? false : true;
+	protected $_loadCommonJs = true;
+	protected $_pageJs       = "";
+	/**
+	 * 特殊控制
+	 */
+	protected $fromFullUrl = "";
+	protected $fromUrl = "";
+	protected $needBack = false;
+	/**
+	 * 推荐人
+	 */
+	protected $fromUser = "";
+	/**
+	 * 微信分享路径
+	 */
+	protected $wxShareUrl = "";
+	protected $wxShrTitle = "";
+	protected $wxShrDesc  = "";
+	/**
+	 * 行政区
+	 */
+//	protected $viewDistrictID = "";
+	/**
+	 * 识别手机类型
+	 */
+	protected $handyType = "";
+	/**
+	 * 微信授权模式
+	 */
+	protected $isNeedAuth   = true;
+	protected $slientWxAuth = true;
+	
+	protected $wxUserId = "";
+	protected $wxUserHp = "";
+	protected $wxUserNm = "";
+	protected $_wxManage = "";
+	
+	public function __construct() {
+		parent::__construct();
+		
+		if ($this->isDebug === true) {
+			$this->wxUserId = "ot7VhxPwYRRkgGu3CUiXASCYo4k0";
+		} else if ($this->isNeedAuth === true) {
+			$this->wxAuth();
+		} else {
+			$this->wxUserId = I("get.id");
+			
+			if (empty($this->wxUserId)) {
+				JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+			} else {
+				$wxUserResourceModel = new WxUserResourceModel();
+				$isExist = $wxUserResourceModel->isExistUserId($this->wxUserId);
+				
+				if ($isExist === false) {
+					JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+				}
+			}
+		}
+		
+		if (!empty($this->wxUserId)) {
+			$this->assign("id", $this->wxUserId);
+		}
+		
+		// 识别手机类型
+		if (WebUtil::isIOS()) {
+			$this->handyType = "ios";
+		} else if (WebUtil::isAndroid()) {
+			$this->handyType = "and";
+		} else {
+			$this->handyType = "oth";
+		}
+		
+		$this->assign("handyType", $this->handyType);
+		$this->assign("title", "东莞慈善");
+		
+		$backUrl        = I("get.backUrl");
+		$this->fromUser = I("get.fromId");
+		
+		if ($this->isDebug === true) {
+			$this->assign("isDebug", "true");
+			$this->assign("jsSrc", HTTP_DEBUG_JS);
+		} else {
+			$this->assign("isDebug", "false");
+			$this->assign("jsSrc", HTTP_COMMON_JS);
+		}
+		
+		$this->_js_loader();
+		
+		$this->assign(HTML_TARGET, strtolower(MODULE_NAME."/".CONTROLLER_NAME));
+		
+		/**
+		 * 特殊控制
+		 */
+		// 来源控制
+//		if ($this->needBack === true) {
+//			if (!empty($backUrl)) {
+//				$this->fromUrl = base64_decode($backUrl);
+//			} else if (!empty($_SERVER["HTTP_REFERER"])) {
+//				$this->fromFullUrl = $_SERVER["HTTP_REFERER"];
+//				$this->fromUrl = $this->interceptUrl($this->fromFullUrl);
+//			}
+//			$this->setPageback();
+//		}
+		
+		// 定位控制
+//		$currUrl = U(__SELF__);
+//		$currUrl = $this->interceptUrl($currUrl, $this->needBack);
+//		$this->setCurrUrl($currUrl);
+		
+		// 来源控制
+//		if (!empty($this->fromUser)) {
+//			$this->assign("fromUser", $this->fromUser);
+//		}
+		
+		// 微信分享路径
+		if (empty($this->wxShareUrl)) {
+			$this->wxShareUrl = U(__SELF__);
+		}
+		
+		if (!empty($this->wxShareUrl)) {
+			if (strpos($this->wxShareUrl, "?") !== false) {
+				$this->wxShareUrl .= "&fromId=".$this->userId;
+			} else {
+				$this->wxShareUrl .= "?fromId=".$this->userId;
+			}
+			
+			$this->assign("wxShareUrl", $this->wxShareUrl);
+			
+			// 微信分享标题
+			if (empty($this->wxShrTitle)) {
+//				$this->wxShrTitle = "[广告] 我为它代言♪(＾∀＾●)ﾉ, 快进来看看!!";
+//				$this->wxShrTitle = "一起做公益!";
+			}
+			
+			if (!empty($this->wxShrTitle)) {
+				$this->assign("wxShrTitle", $this->wxShrTitle);
+			}
+			
+			// 扩展说明
+			if (empty($this->wxShrDesc)) {
+//				$this->wxShrDesc = "互联网厂家直营店";
+			}
+			
+			if (!empty($this->wxShrDesc)) {
+				$this->assign("wxShrDesc", $this->wxShrDesc);
+			}
+		}
+		
+		// 城市/省会控制
+//		$districtID = I("get.district");
+		
+//		if (!empty($districtID)) {
+//			$this->viewDistrictID = $districtID;
+//		} else {
+//			$districtInfo = $wxAppModel->getFirstDistrictInfo($this->pageRootUrl());
+//			
+//			if (!empty($districtInfo) && is_array($districtInfo)) {
+//				if (isset($districtInfo["district"]) && !empty($districtInfo["district"])) {
+//					$this->viewDistrictID = $districtInfo["district"];
+//				}
+//			}
+//		}
+		
+//		if (!empty($this->viewDistrictID)) {
+//			$this->assign("district", $this->viewDistrictID);
+//		}
+	}
+	
+	protected function _js_loader() {
+		// 加载全局共通Js
+		if ($this->_loadCommonJs === true) {
+			$this->assign("loadCommonJs", "1");
+		}
+		
+		// 加载页面Js
+		if (!empty($this->_pageJs)) {
+			$this->assign("pageJs", strtolower(APP_NAME."/".MODULE_NAME."/".$this->_pageJs));
+		}
+	}
+	
+	public function sessionUser() {
+		JsonUtil::response(JsonUtil::RET_SUCC, array("name" => "15818411995", "pwd" => "9b3d16ce857380dc8529776be26b46ab"));
+	}
+	
+	protected function dgTownData() {
+		$data = array();
+		
+		$data[] = array("key" => "100", "val" => "莞城");
+		$data[] = array("key" => "101", "val" => "南城");
+		$data[] = array("key" => "102", "val" => "东城");
+		$data[] = array("key" => "103", "val" => "万江");
+		$data[] = array("key" => "104", "val" => "石碣");
+		$data[] = array("key" => "105", "val" => "石龙");
+		$data[] = array("key" => "106", "val" => "茶山");
+		$data[] = array("key" => "107", "val" => "石排");
+		$data[] = array("key" => "108", "val" => "企石");
+		$data[] = array("key" => "109", "val" => "横沥");
+		$data[] = array("key" => "110", "val" => "桥头");
+		$data[] = array("key" => "111", "val" => "谢岗");
+		$data[] = array("key" => "112", "val" => "东坑");
+		$data[] = array("key" => "113", "val" => "常平");
+		$data[] = array("key" => "114", "val" => "寮步");
+		$data[] = array("key" => "115", "val" => "大朗");
+		$data[] = array("key" => "116", "val" => "黄江");
+		$data[] = array("key" => "117", "val" => "清溪");
+		$data[] = array("key" => "118", "val" => "塘厦");
+		$data[] = array("key" => "119", "val" => "凤岗");
+		$data[] = array("key" => "120", "val" => "长安");
+		$data[] = array("key" => "121", "val" => "虎门");
+		$data[] = array("key" => "122", "val" => "厚街");
+		$data[] = array("key" => "123", "val" => "沙田");
+		$data[] = array("key" => "124", "val" => "道滘");
+		$data[] = array("key" => "125", "val" => "洪梅");
+		$data[] = array("key" => "126", "val" => "麻涌");
+		$data[] = array("key" => "127", "val" => "中堂");
+		$data[] = array("key" => "128", "val" => "高埗");
+		$data[] = array("key" => "129", "val" => "樟木头");
+		$data[] = array("key" => "130", "val" => "大岭山");
+		$data[] = array("key" => "131", "val" => "望牛墩");
+		
+		$this->assign("dgTown", $data);
+	}
+	
+//	protected function setPageback() {
+//		$this->assign(PAGE_BACK, $this->fromUrl);
+//	}
+	
+//	protected function setCurrUrl($currUrl) {
+//		$this->assign("currUrl", $currUrl);
+//	}
+	
+//	protected function interceptUrl($url, $blnNeedBackUrl = true) {
+//		if (!empty($url) && strpos($url, "?") !== false) {
+//			$baseUrl = substr($url, 0, strpos($url, "?"));
+//			$param = substr($url, strpos($url, "?") + 1);
+//			$arrParam = StringUtil::splitUrlParamToArray($param, "&", "=");
+//			$needParam = array();
+//			
+//			if (!empty($arrParam) && is_array($arrParam)) {
+//				foreach ($arrParam as $key => $param) {
+//					if ($key !== "id" && $key !== "token" 
+//						&& $key !== "fromId" && $key !== "nick"
+//						&& $key !== "headimg" && $key !== "sex"
+//						&& $key !== "province" && $key !== "city"
+//						&& $key !== "country" && $key !== "district"
+//						&& !empty($param)) {
+//						if ($blnNeedBackUrl == true) {
+//							$needParam[$key] = $param;
+//						} else {
+//							if ($key !== "backUrl") {
+//								$needParam[$key] = $param;
+//							}
+//						}
+//					}
+//				}
+//			}
+//			
+//			if (!empty($needParam) && is_array($needParam)) {
+//				$url = $baseUrl."?".ArrayUtil::impoldeToStr($needParam, "=", "&");
+//			} else {
+//				$url = $baseUrl;
+//			}
+//		}
+//		
+//		return $url;
+//	}
+
+	protected function wxAuth() {
+		$code       = I('get.code');
+        $state      = I('get.state');
+        $wxManage   = "";
+    	$this->_wxManage = new WeiXinManage(WEIXIN_APP_ID, WEIXIN_APP_SECRET, new WxTokenModel(), new WxTicketModel());
+        
+        if (empty($code) && empty($state)) {
+        	$jumpKey = rand();
+        	
+        	$rootUrl = U(__SELF__);
+//        	\Think\Log::write($rootUrl);
+
+			if ($this->slientWxAuth === false) {
+//				\Think\Log::write("-- snsapi userinfo --");
+				$url = $this->_wxManage->getOAuthConnectUri($rootUrl, $jumpKey, 'snsapi_userinfo');
+			} else {
+//				\Think\Log::write("-- snsapi base --");
+				$url = $this->_wxManage->getOAuthConnectUri($rootUrl, $jumpKey);
+			}
+        	
+			redirect($url);
+            return;
+        } else if (!empty($code) && !empty($state)) {
+        	$options = array();
+        	
+        	if ($this->slientWxAuth === false) {
+        		$options["userInfo"] = true;
+        	}
+        	
+        	$wxUserInfo = $this->userInfo($code, $options);
+        	
+        	if (empty($wxUserInfo)) {
+        		$rootUrl = U(__SELF__);
+        		
+        		if (strpos($rootUrl, "?")) {
+        			$url = substr($rootUrl, 0, strpos($rootUrl, "?"));
+        		} else {
+        			$url = $rootUrl;
+        		}
+        		
+        		$no = I("get.no");
+        		
+        		if (!empty($no)) {
+        			$url .= "?no=".$no;
+        		}
+        		
+        		\Think\Log::write($url);
+        		\Think\Log::write("-- slient err 005 --");
+                // 授权失败或者其他原因导致没有code，跳回到选择页
+        		redirect($url);
+                exit();
+            }
+            
+            $this->wxUserId = $wxUserInfo["id"];
+            
+            if (isset($wxUserInfo["headimg"])) {
+            	$this->wxUserHp = $wxUserInfo["headimg"];
+            	$this->assign("wxUserHp", $this->wxUserHp);
+            }
+            if (isset($wxUserInfo["nick"])) {
+            	$this->wxUserNm = $wxUserInfo["nick"];
+            	$this->assign("wxUserNm", $this->wxUserNm);
+            }
+        }
+	}
+	
+	protected function userInfo($code, $options = array()) {
+		$userInfo = "";
+		
+		if (!empty($code)) {
+			$accessInfo = $this->_wxManage->getAccessTokenByCode($code);
+			
+			if (isset($accessInfo['errcode'])) {
+				\Think\Log::write($accessInfo['errcode']);
+				\Think\Log::write($accessInfo['errmsg']);
+			}
+			
+			if (isset($accessInfo['openid'])) {
+				$wxUserResourceModel = new WxUserResourceModel();
+				
+				 if (isset($options['userInfo']) && $options['userInfo'] === true && isset($accessInfo['access_token'])) {
+				 	/**
+                	 * 公开授权
+                	 */
+                	// 开始重构
+                	$userInfo = $this->_wxManage->getUserInfoByAuth($accessInfo['access_token'], $accessInfo['openid']);
+                	
+                	$userInfo = $wxUserResourceModel->addResource($accessInfo['openid'], htmlentities(json_encode($userInfo["nickname"])), $userInfo['headimgurl'], $userInfo['sex'], EncodeUtil::unicodeEncode($userInfo['province']), EncodeUtil::unicodeEncode($userInfo['city']), EncodeUtil::unicodeEncode($userInfo['country']));
+                	// 改变用户状态
+                	// 公开授权登录
+                	$wxUserResourceModel->openAuthLogined($userInfo["id"]);
+				 } else {
+				 	/**
+                	 * 静默授权
+                	 */
+                	$userInfo = array();
+                	$userInfo["id"] = $accessInfo['openid'];
+                	// 改变用户状态
+	            	// 静默授权登录
+	            	$wxUserResourceModel->silentAuthLogined($userInfo["id"]);
+				 }
+			}
+		}
+		
+		return $userInfo;
+	}
+	
+}
+?>

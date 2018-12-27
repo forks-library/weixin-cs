@@ -1,0 +1,59 @@
+<!--我捐助过的项目-->
+{{if juan}}
+	{{each juan as donate i}}
+	<li class="aclick-btn" data-url="et.redirect(et.url('user/donation/detail',{no: '{{donate.juanHelpCode}}'}));">
+		<div class="me-tab-ulconttxt bg-white">
+			<div class="width60 height100 ellipsis left">{{donate.juanTitle}}</div>
+			<div class="width40 height100 ellipsis left text-right color-red">共捐助{{donate.juanAllPay}}元</div>
+		</div>
+	</li>
+	{{/each}}
+{{/if}}
+<!--我求助过的项目-->
+{{if seek}}
+	{{each seek as needhelp i}}
+	{{if needhelp.status == 1 || needhelp.status == 2 || needhelp.status == 4}}
+	<li class="aclick-btn needhelp-list-son" data-url="et.redirect(et.url('user/needhelppage/index', {no: '{{needhelp.helpCode}}'}));">
+	{{else if needhelp.status == 3}}
+	<li class="aclick-btn needhelp-list-son" data-url="et.redirect(et.url('user/donation/detail', {no: '{{needhelp.helpCode}}'}));">
+	{{/if}}
+		<div class="me-tab-ulconttxt bg-white ellipsis relative">
+			{{if needhelp.isMessage == 1}}
+			<i class="needhelp-newmsg-tips icon-ulconttxt-message"></i>
+			{{/if}}
+			{{if needhelp.title != ''}}{{needhelp.title}}{{else}}{{needhelp.helpTitle}}{{/if}}
+		</div>
+		{{if needhelp.status == 1 || needhelp.status == 2 || needhelp.status == 4}}
+		<div class="needhelp-feedback me-tab-ulcont-notice">
+			<div class="me-tab-ulcont-notice-txt">
+				<i class="cfm-me-limsg-icon"></i>
+				{{if needhelp.status == 1}}未审核，未发布{{else if needhelp.status == 2}}已审核，未发布{{else if needhelp.status == 4}}审核不通过{{/if}}
+			</div>
+		</div>
+		{{/if}}
+	</li>
+	{{/each}}
+{{/if}}
+<!--我申请的活动-->
+{{if activity}}
+	{{each activity as active i}}
+	{{if active.status == 1 || active.status == 2 || active.status == 3 || active.status == 4}}
+	<li class="aclick-btn activity-list-son" data-url="et.redirect(et.url('user/activity/index', {no: '{{active.activityNo}}'}));">
+	{{/if}}
+		<div class="me-tab-ulconttxt bg-white ellipsis relative">
+			{{if active.isMessage == 1}}
+			<i class="activity-newmsg-tips icon-ulconttxt-message "></i>
+			{{/if}}
+			{{active.note}}
+		</div>
+		{{if active.status == 1 || active.status == 2 || active.status == 3 || active.status == 4}}
+		<div class="activity-feedback me-tab-ulcont-notice ">
+			<div class="me-tab-ulcont-notice-txt">
+				<i class="cfm-me-limsg-icon"></i>	
+				{{if active.status == 1}}未审核，未发布{{else if active.status == 2}}已审核，未发布{{else if active.status == 3}}已发布{{else if active.status == 4}}审核不通过{{/if}}					
+			</div>
+		</div>
+		{{/if}}
+	</li>
+	{{/each}}
+{{/if}}

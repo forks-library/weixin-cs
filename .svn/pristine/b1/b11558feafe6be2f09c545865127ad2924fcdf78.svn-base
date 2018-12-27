@@ -1,0 +1,10 @@
+{{if dynamic}}
+<!--标题-->
+<div class="article-twotitle inline-block">
+	<div class="article-twotitle-txt">{{dynamic.title}}</div>
+	<div class="article-title-time">{{dynamic.time}}</div>
+</div>
+<div class="article-cont inline-block size-l news-cont">
+{{dynamic.note}}
+</div>
+{{/if}}

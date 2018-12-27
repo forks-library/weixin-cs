@@ -1,0 +1,420 @@
+<?php
+namespace Com\Mor\Model\Sys;
+use Com\Mor\Model\VersionModel;
+use Com\Mor\Model\Sys\MtHelpInformationModel;
+use Com\Mor\Model\Sys\MtMissionAmountModel;
+use Com\Mor\Model\Weixin\WxUserResourceModel;
+use Com\Mor\Util\EncodeUtil;
+use Com\Mor\Util\JsonUtil;
+use Com\Mor\Util\SystemCoderUtil;
+use Com\Mor\Manage\OptionManage;
+
+class MtHelpOrderModel extends VersionModel {
+	
+	public function countOrderByHelpCode($helpCode) {
+		$count = 0;
+		
+		if (!empty($helpCode)) {
+			try {
+				$sql  = " select count(*) as count ";
+				$sql .= " from ( ";
+				$sql .= " select distinct wx_user_id ";
+				$sql .= " from mt_help_order c ";
+				$sql .= " where (c.help_code = '".$helpCode."' and order_status = '2') ";
+				$sql .= " ) c ";
+				
+				$data = $this->query($sql);
+				
+				if (!empty($data) && is_array($data)) {
+					$count = $data[0]["count"];
+				}
+			} catch (\Exception $e) {
+				$count = 0;
+			}
+		}
+		
+		return $count;
+	}
+	
+	public function getTopFiveDonater($helpCode) {
+		$topFive = array();
+		
+		if (!empty($helpCode)) {
+			try {
+				$sql  = " select wur.user_wx_id, ifnull(wur.nick_name, '') as nick_name, ifnull(wur.head_img_url, '') as head_img_url, sum(mho.pay_amount) as pay_amount ";
+				$sql .= " from wx_user_resource wur ";
+				$sql .= " left join mt_help_order mho on wur.user_wx_id = mho.wx_user_id ";
+				$sql .= " where wur.user_wx_id in ( ";
+				$sql .= " select d.wx_user_id ";
+				$sql .= " from ( ";
+				$sql .= " select distinct wx_user_id ";
+				$sql .= " from mt_help_order c ";
+				$sql .= " where (c.help_code = '".$helpCode."' and order_status = '2') order by mt_help_order_id asc limit 0, 5 ";
+				$sql .= " ) d ";
+				$sql .= " ) ";
+				$sql .= " and mho.help_code = '".$helpCode."' ";
+				$sql .= " group by wur.user_wx_id ";
+				$sql .= " order by mho.mt_help_order_id ";
+				
+				$datas = $this->query($sql);
+				
+				if (!empty($datas) && is_array($datas)) {
+					foreach ($datas as $k1 => $data) {
+						$topData = array();
+						$topData["nickName"] = !empty($data["nick_name"]) ? json_decode(html_entity_decode(EncodeUtil::dbUnicodeDecode($data["nick_name"]))): "匿名";
+						$topData["imgUrl"]   = !empty($data["head_img_url"]) ? $data["head_img_url"]: "";
+						
+						$topFive[] = $topData;
+					}
+				}
+			} catch (\Exception $e) {
+				$topFive = array();
+			}
+		}
+		
+		return $topFive;
+	}
+	
+	public function getDonatorList($helpCode) {
+		$donators = array();
+		
+		if (!empty($helpCode)) {
+			try {
+				$sql  = " select wur.user_wx_id, ifnull(wur.nick_name, '') as nick_name, ifnull(wur.head_img_url, '') as head_img_url, sum(mho.pay_amount) as pay_amount ";
+				$sql .= " from wx_user_resource wur ";
+				$sql .= " left join mt_help_order mho on wur.user_wx_id = mho.wx_user_id ";
+				$sql .= " where wur.user_wx_id in ( ";
+				$sql .= " select d.wx_user_id ";
+				$sql .= " from ( ";
+				$sql .= " select distinct wx_user_id ";
+				$sql .= " from mt_help_order c ";
+				$sql .= " where (c.help_code = '".$helpCode."' and order_status = '2') order by mt_help_order_id ";
+				$sql .= " ) d ";
+				$sql .= " ) ";
+				$sql .= " and mho.help_code = '".$helpCode."' ";
+				$sql .= " group by wur.user_wx_id ";
+				$sql .= " order by mho.mt_help_order_id ";
+				
+				$datas = $this->query($sql);
+				
+				if (!empty($datas) && is_array($datas)) {
+					foreach ($datas as $k1 => $data) {
+						$donator = array();
+						$donator["nickName"] = !empty($data["nick_name"]) ? json_decode(html_entity_decode(EncodeUtil::dbUnicodeDecode($data["nick_name"]))): "匿名";
+						$donator["imgUrl"]   = !empty($data["head_img_url"]) ? $data["head_img_url"]: "";
+						$donator["sumAmount"]= !empty($data["pay_amount"]) ? $data["pay_amount"] : 0;
+						
+						$donators[] = $donator;
+					}
+				}
+			} catch (\Exception $e) {
+				$topFive = array();
+			}
+		}
+		
+		return $donators;
+	}
+	
+	public function createDoantionOrder($order) {
+		$orderNo = "";
+		
+		if (!empty($order) && is_array($order)
+			&& isset($order["userId"]) && !empty($order["userId"])
+			&& isset($order["helpCode"]) && !empty($order["helpCode"])
+			&& isset($order["payAmount"]) && !empty($order["payAmount"]) && is_numeric($order["payAmount"]) && floatval($order["payAmount"]) > 0) {
+			try {
+				$where = " c.wx_user_id = '".$order["userId"]."' and c.help_code = '".$order["helpCode"]."' and c.order_status = '1' ";
+				
+				$field = array();
+				$field[] = "ifnull(c.order_no, '') as order_no";
+				$field[] = "ifnull(c.order_status, '0') as order_status";
+				
+				$data = $this->where($where)->field($field)->find();
+				
+				if (!empty($data) && is_array($data) && !empty($data["order_no"]) && !empty($data["order_status"])) {
+					$orderNo = $data["order_no"];
+						
+					$data = array();
+					$data["order_type"] = "1";
+					$data["pay_amount"] = $order["payAmount"];
+					
+					if (!empty($order["company"])) {
+						$data["company"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($order["company"]));
+					} else {
+						$data["company"] = null;
+					}
+					
+					if (!empty($order["helpNm"])) {
+						$data["help_name"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($order["helpNm"]));
+					} else {
+						$data["help_name"] = null;
+					}
+					
+					if (!empty($order["handy"])) {
+						$data["handy"] = $order["handy"];
+					} else {
+						$data["handy"] = null;
+					}
+					
+					$this->startTrans();
+					
+					$r1 = $this->where(" c.order_no = '".$orderNo."'")->save($data);
+					
+					if ($r1 !== false) {
+						$this->commit();
+					} else {
+						$this->rollback();
+						$orderNo = "";
+					}
+				} else {
+					$orderNo = $this->generateOrderNoCode();
+					
+					if (!empty($orderNo)) {
+						$data = array();
+						$data["order_no"]     = $orderNo;
+						$data["wx_user_id"]   = $order["userId"];
+						$data["help_code"]    = $order["helpCode"];
+						$data["order_type"]   = "1";
+						$data["order_status"] = "1";
+						$data["pay_amount"]   = $order["payAmount"];
+						
+						if (!empty($order["company"])) {
+							$data["company"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($order["company"]));
+						} else {
+							$data["company"] = null;
+						}
+						
+						if (!empty($order["helpNm"])) {
+							$data["help_name"] = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($order["helpNm"]));
+						} else {
+							$data["help_name"] = null;
+						}
+						
+						if (!empty($order["handy"])) {
+							$data["handy"] = $order["handy"];
+						} else {
+							$data["handy"] = null;
+						}
+						
+						$this->startTrans();
+					
+						$r1 = $this->data($data)->add();
+						
+						if ($r1 !== false) {
+							$this->commit();
+						} else {
+							$this->rollback();
+							$orderNo = "";
+						}
+					}
+				}
+			} catch (\Exception $e) {
+				$this->rollback();
+				$orderNo = "";
+				JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+			}
+		}
+		
+		return $orderNo;
+	}
+	
+	public function createDonationPayOrder($orderNo) {
+		$payOrderNo = "";
+		
+		if (!empty($orderNo)) {
+			try {
+				$where = " c.order_no = '".$orderNo."' and c.order_status = '1' ";
+				
+				$field = array();
+				$field[] = "c.".$this->getPk();
+				$field[] = "ifnull(c.pay_order_no, '') as pay_order_no";
+				
+				$data = $this->where($where)->field($field)->find();
+				
+				if (!empty($data) && is_array($data) && !empty($data[$this->getPk()])) {
+					$id = $data[$this->getPk()];
+					$payOrderNo = $this->generatePayOrderNoCode();
+					
+					if (!empty($payOrderNo)) {
+						$data = array();
+						$data["pay_order_no"] = $payOrderNo;
+						
+						$this->startTrans();
+						
+						$r1 = $this->where($this->getPk()." = '".$id."'")->save($data);
+						
+						if ($r1 !== false) {
+							$this->commit();
+						} else {
+							$this->rollback();
+							$payOrderNo = "";
+						}
+					}
+				}
+			} catch (\Exception $e) {
+				$this->rollback();
+				$payOrderNo = "";
+				JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+			}
+		}
+		
+		return $payOrderNo;
+	}
+	
+	public function updDonationOrder($payOrderNo) {
+		$blnSucc = array(false, false, false);
+		
+		if (!empty($payOrderNo)) {
+			$where = " c.pay_order_no = '".$payOrderNo."' and c.order_status = '1' ";
+			
+			$field  = array();
+			$field[]= "c.".$this->getPk();
+			$field[]= "c.help_code";
+			$field[]= "c.pay_amount";
+			$field[]= "c.wx_user_id";
+			$field[]="ifnull(mhi.help_title, '') as help_title";
+			
+			$join   = " mt_help_information mhi on c.help_code = mhi.help_code ";
+			
+			$this->join($join);
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$id        = $data[$this->getPk()];
+				$helpCode  = $data["help_code"];
+				$payAmount = $data["pay_amount"];
+				$wxUserId  = $data["wx_user_id"];
+				$helpTitle = !empty($data["help_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"])) : "东莞慈善";
+				
+				try {
+					$this->startTrans();
+					
+					$data = array();
+					$data["order_status"] = "2";
+					
+					$this->where($this->getPk()." = '".$id."'")->field($this->getPk())->lock(true)->find();
+					$r1 = $this->where($this->getPk()." = '".$id."'")->save($data);
+					
+					if ($r1 !== false) {
+						$mtHelpInformationModel = new MtHelpInformationModel();
+						$r1 = $mtHelpInformationModel->updAlreadyMoney($helpCode, $payAmount);
+						
+						if ($r1 !== false) {
+							$wxUserResourceModel = new WxUserResourceModel();
+							$r1 = $wxUserResourceModel->updUserDonationAmount($wxUserId, $payAmount);
+							
+							if ($r1 !== false) {
+								$mtMissionAmountModel = new MtMissionAmountModel();
+								$r1 = $mtMissionAmountModel->updTotalMoney($payAmount);
+								
+								if ($r1 !== false) {
+									$this->commit();
+									$blnSucc = array($wxUserId, $helpTitle, $payAmount);
+								} else {
+									$this->rollback();
+								}
+							} else {
+								$this->rollback();
+							}
+						} else {
+							$this->rollback();
+						}
+					} else {
+						$this->rollback();
+					}
+				} catch (\Exception $e) {
+					$this->rollback();
+				}
+			}
+		}
+		
+		return $blnSucc;
+	}
+	
+	protected function generateOrderNoCode() {
+		$code = $this->generateRandomTime();
+		
+		if (!empty($code)) {
+			try {
+				$where = " c.order_no = '".$code."' ";
+				$count = $this->where($where)->count();
+				
+				if (intval($count) > 0) {
+					$code = $this->generateOrderNoCode();
+				} else {
+					$code = $code;
+				}
+			} catch (\Exception $e) {
+				$code = "";
+			}
+		}
+		
+		return $code;
+	}
+	
+	protected function generatePayOrderNoCode() {
+		$code = $this->generateRandomTime();
+		
+		if (!empty($code)) {
+			try {
+				$where = " c.pay_order_no = '".$code."' ";
+				$count = $this->where($where)->count();
+				
+				if (intval($count) > 0) {
+					$code = $this->generatePayOrderNoCode();
+				} else {
+					$code = $code;
+				}
+			} catch (\Exception $e) {
+				$code = "";
+			}
+		}
+		
+		return $code;
+	}
+	
+	public function getHelpProject($userId, $page = 1) {
+		$projects = array();
+		
+		if (!empty($userId)) {
+			$total = 0;
+			
+			$where = " c.wx_user_id = '".$userId."' and c.order_status = 2 ";
+			
+			$sql  = " select distinct mhi.help_title,c.help_code,sum(c.pay_amount) as all_pay ";
+			$sql .= " from ".$this->getTableName()." c ";
+			$sql .= " left join mt_help_information mhi on mhi.help_code = c.help_code ";
+			$sql .= " where ".$where." ";
+			
+			$countSql  = " select count(*) as count from ";
+			$countSql .= " (".$sql.") d ";
+			
+			$countData = $this->query($countSql);
+			
+			if (!empty($countData) && is_array($countData)) {
+				$total = floatval($countData[0]["count"]);
+			}
+		
+			$totalPage = $this->countPage($total);
+			
+			$sql .= " order by c.mt_help_order_id desc ";
+			$sql .= " limit 0,40 ";
+			
+			$datas = $this->query($sql);
+			
+			if (!empty($datas) && is_array($datas)) {
+				foreach ($datas as $k1 => $data) {
+					$project = array();
+					
+					$project["juanHelpCode"] = $data["help_code"];
+					$project["juanAllPay"]   = $data["all_pay"];
+					$project["juanTitle"]    = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["help_title"]));
+					$projects[] = $project;
+				}
+			}
+		}
+		
+		return $projects;
+	}
+}
+?>

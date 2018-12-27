@@ -1,0 +1,21 @@
+<?php
+namespace Home\Controller;
+use Com\Mor\Controller\WeixinController;
+use Com\Mor\Model\Sys\MtHelpInformationModel;
+
+class NopublicprojectController extends WeixinController {
+	
+	public function __construct() {
+		$this->_pageJs = "nopublicproject";
+		parent::__construct();
+	}
+	
+	public function index() {
+		$infoNo = I("get.infoNo");
+		$mtHelpInformationModel = new MtHelpInformationModel();
+		$data = $mtHelpInformationModel->getProjectDetail($infoNo);
+		$this->assign('data',$data);
+		$this->display();
+	}
+}
+?>

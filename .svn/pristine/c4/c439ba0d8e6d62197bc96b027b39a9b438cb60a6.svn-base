@@ -1,0 +1,16 @@
+<?php
+namespace Act\Controller;
+use Com\Mor\Controller\WeixinController;
+use Com\Mor\Model\Sys\MtLeaveWordModel;
+use Com\Mor\Model\Sys\MtHelpInformationModel;
+use Com\Mor\Model\Sys\MtHelpTypeModel;
+use Com\Mor\Util\JsonUtil;
+
+class LeavewordController extends WeixinController {
+	
+	public function __construct() {
+		$this->isNeedAuth = false;
+		parent::__construct();
+	}
+}
+?>

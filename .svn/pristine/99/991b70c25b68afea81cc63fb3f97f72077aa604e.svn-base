@@ -1,0 +1,11 @@
+{{if paybill}}
+<!--标题-->
+<div class="article-twotitle inline-block">
+	<div class="article-twotitle-txt">{{paybill.title}}</div>
+	<div class="article-title-time">{{paybill.time}}</div>
+</div>
+<!--列表内容-->
+<div class="article-cont paybill-cont size-s">
+{{paybill.note}}
+</div>
+{{/if}}

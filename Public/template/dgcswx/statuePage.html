@@ -1,0 +1,19 @@
+{{if statue}}
+<!--标题-->
+<div class="article-twotitle inline-block">
+	<div class="article-twotitle-txt">{{statue.title}}</div>
+	<div class="article-title-time">{{statue.time}}</div>
+</div>
+<div class="article-cont inline-block size-l">
+{{if statue.imgs && statue.imgs.length > 0}}
+{{each statue.imgs as img i}}
+	<img class="width100" src="{{img}}" alt="" />
+{{/each}}
+{{/if}}
+{{if statue.htmls}}
+{{each statue.htmls as html i}}
+	<iframe style="width: 100%;" src="{{html}}"></iframe>
+{{/each}}
+{{/if}}
+</div>
+{{/if}}

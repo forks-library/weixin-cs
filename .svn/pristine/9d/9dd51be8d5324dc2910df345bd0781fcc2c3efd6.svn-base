@@ -1,0 +1,11 @@
+{{if datas}}
+{{each datas as donater i}}
+<li>
+	<div class="donorname-list-img">
+		<img class="width100 height100" src="{{donater.imgUrl}}" alt="" />
+	</div>
+	<div class="donorname-list-name">{{donater.nickName}}</div>
+	<div class="income-color donorname-list-price">￥{{donater.sumAmount}}</div>
+</li>
+{{/each}}
+{{/if}}

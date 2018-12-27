@@ -1,0 +1,24 @@
+<?php
+namespace Act\Controller;
+use Com\Mor\Controller\WeixinController;
+use Com\Mor\Model\Sys\MtBanModel;
+use Com\Mor\Util\JsonUtil;
+
+class BannerController extends WeixinController {
+	
+	public function __construct() {
+		$this->isNeedAuth = false;
+		parent::__construct();
+	}
+
+	public function getBan() {
+		$ban  = array();
+		$banModel = new MtBanModel();
+	    $ban  = $banModel->getBanList();
+
+		JsonUtil::response(JsonUtil::RET_SUCC, array("datas" => $ban));
+		
+	}
+	
+}
+?>

@@ -1,0 +1,64 @@
+
+<!--标题-->
+	<div class="article-title inline-block">
+		<div class="article-title-txt">东莞报业传媒爱心帮扶基金</div>
+		<div class="article-title-time">设立时间：2017-07-01</div>
+	</div>
+	<!--活动主题-->
+	<div class="article-cont">
+		<div class="project-theme">活动主题：聚焦贫困人口，助力攻坚脱贫。 主要目标：围绕省委、省政府确定的打赢精准扶贫精准脱贫攻战的目标任务，按照“宣传发动更加充分、活动形式更加多样、参与范围更加广泛”的要求，通过广泛发动组织社会各界通过捐赠或志愿服务等多种方式积极参与扶贫济困活动，力争今年我市捐赠总额不低于去年水平，切实在帮扶我市贫困人口、弱势群体和困难群众上取得实效。</div>
+	</div>
+	
+	<!--项目明细-->
+	<div class="donate-cont">
+		<div class="donate-details bg-white">项目期限：<span>2017/02/02—2017/12/12</span></div>
+		<div class="donate-details bg-white">目标金额：<span class="expenditure-color">200,000.00元</span></div>
+		<div class="donate-details bg-white">已筹款金额：<span class="income-color">100,000.00元</span></div>
+		<div class="donate-details bg-white">救助情况：<span>马女士从来就没有想过，患有先天性心脏病的侄女在医院做了手术治疗，竟不用花一分钱。</span></div>
+	</div>
+	
+	<!--捐助者名单-->
+	<div class="marginb-08rem donor-namelist bg-white inline-block width100">
+		<div class="aclick-btn donor-namelist-head width100" >共66位捐助者</div>
+		<div class="donor-namelist-ul">
+			<ul class="scroll-x">
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+				<li>
+					<img class="donor-picture" src="__PUBLIC__/images/cf-icon-donor.png" alt="" />
+					<div class="donor-name ellipsis text-center">蕃茄网络</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<!--我要捐款、邀好友一起捐-->
+	<div class="i-need-donor width100">
+		<div class="color-white text-center size-l i-want-donor left">我要捐款</div>
+		<div class="color-white text-center size-l call-friend-donor  left">邀好友一起捐</div>
+	</div>
+	<div class="masking-page masking-sharepage display-none">
+		<i class="cfm-icon-share"></i>
+	</div>

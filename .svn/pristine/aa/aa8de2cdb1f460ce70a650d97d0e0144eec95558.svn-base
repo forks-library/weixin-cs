@@ -1,0 +1,7 @@
+{{if datas}}
+{{each datas as banner i}}
+<div class="swipe-wrap-item">
+	<img class="width100 height100 block" src="{{banner.display_pic}}" alt="">
+</div>
+{{/each}}
+{{/if}}

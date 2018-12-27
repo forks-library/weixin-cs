@@ -1,0 +1,274 @@
+<?php
+namespace Com\Mor\Model\Sys;
+use Com\Mor\Model\VersionModel;
+use Com\Mor\Model\Sys\MtHelpPicModel;
+use Com\Mor\Util\EncodeUtil;
+use Com\Mor\Util\JsonUtil;
+use Com\Mor\Util\ImgUtil;
+use Com\Mor\Util\StringUtil;
+
+class MtNewsDynamicModel extends VersionModel {
+	
+	public function getRescueData() {
+		$rescue  = "";
+		
+		$where   = " c.type = '6' ";
+		$field   = array();
+		$field[] = "ifnull(c.news_dynamic_note, '') as note";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$rescue = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+		}
+		
+		return $rescue;
+	}
+	
+	public function getDonationNote() {
+		$rescue  = "";
+		
+		$where   = " c.type = '7' ";
+		$field   = array();
+		$field[] = "ifnull(c.news_dynamic_note, '') as note";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$rescue = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+		}
+		
+		return $rescue;
+	}
+	
+	public function getActivityNote() {
+		$rescue  = "";
+		
+		$where   = " c.type = '8' ";
+		$field   = array();
+		$field[] = "ifnull(c.news_dynamic_note, '') as note";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$rescue = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+		}
+		
+		return $rescue;
+	}
+	
+	public function getPostulantNote() {
+		$rescue  = "";
+		
+		$where   = " c.type = '9' ";
+		$field   = array();
+		$field[] = "ifnull(c.news_dynamic_note, '') as note";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$rescue = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+		}
+		
+		return $rescue;
+	}
+	
+	public function getAllNews($searchText = "", $page = 1, $status = "", $newstype = "") {
+		$newsDynamic = array();
+		$type        = $this->newsType();
+		$where       = " 1 = 1 ";
+		
+		$field   = array();
+		$field[] = "c.".$this->getPk();
+		$field[] = "c.news_dynamic_no";
+		$field[] = "c.news_dynamic_title";
+		$field[] = "c.news_dynamic_note";
+		$field[] = "ifnull(c.release_time, 0) as release_time";
+		$field[] = "c.type";
+
+		if (!empty($searchText)) {
+			$name   = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($searchText));
+			$where .= " and c.news_dynamic_title ='".$name."' ";
+		}
+		
+		if (!empty($status) && is_array($status)) {
+			$statuses = "";
+			foreach ($status as $k1 => $s1) {
+				if (!empty($statuses)) {
+					$statuses .= " , ";
+				}
+				$statuses .= " '".$s1."' ";
+			}
+			$where .= " and c.status in (".$statuses.") ";	
+		}
+		
+		if (!empty($newstype) && is_array($newstype)) {
+			$types = "";
+			foreach ($newstype as $k1 => $s1) {
+				if (!empty($types)) {
+					$types .= " , ";
+				}
+				$types .= " '".$s1."' ";
+			}
+			$where .= " and c.type in (".$types.") ";	
+		}
+		
+	
+		$total     = $this->countAll($where);
+		$totalPage = $this->countPage($total);
+		
+		$this->setLimit($page);
+		$datas = $this->where($where)->order($this->getPk()." desc")->getField($field);
+		
+		if (!empty($datas) && is_array($datas)) {
+			$statutePic = new MtHelpPicModel();
+			
+			foreach ($datas as $k1 => $data) {
+				$news = array();
+				$news["code"]      = $data["news_dynamic_no"];
+				$news["title"]     = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_title"]));
+				$news["note"]      = StringUtil::dbToHtml(EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_note"])));
+				$news["time"]      = !empty($data["release_time"]) ? date("Y-m-d", $data["release_time"]) : "-";
+				
+				$firstPic = $statutePic->getFirstHelpPic($data["news_dynamic_no"]);
+				$news["first"] = !empty($firstPic) ? ImgUtil::imgHandy($firstPic, "320") : "";
+				
+				$newsDynamic[] = $news;
+			}
+		}
+		
+		return $newsDynamic;
+	}
+	
+	public function getPayList($searchText = "", $page = 1) {
+		$newsDynamic = array();
+		$type        = $this->newsType();
+		$where       = " c.type = '5' ";
+		
+		$field   = array();
+		$field[] = "c.news_dynamic_no";
+		$field[] = "c.news_dynamic_title";
+		$field[] = "ifnull(c.release_time, 0) as release_time";
+		$field[] = "c.type";
+
+		if (!empty($searchText)) {
+			$name   = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($searchText));
+			$where .= " and c.news_dynamic_title = '".$name."' ";
+		}
+	
+		$total     = $this->countAll($where);
+		$totalPage = $this->countPage($total);
+		
+		$this->setLimit($page);
+		$datas = $this->where($where)->order($this->getPk()." asc")->getField($field);
+		
+		if (!empty($datas) && is_array($datas)) {
+			foreach ($datas as $k1 => $data) {
+				$news = array();
+				$news["code"]      = $data["news_dynamic_no"];
+				$news["title"]     = EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_title"]));
+				$news["time"]      = !empty($data["release_time"]) ? date("Y-m-d", $data["release_time"]) : "-";
+				
+				$newsDynamic[] = $news;
+			}
+		}
+		
+		return $newsDynamic;
+	}
+	
+	public function getNewsDetail($id) {
+		$news = array();
+	
+		if (!empty($id)) {
+			$where   = " c.news_dynamic_no = '".$id."' ";
+			
+			$field   = array();
+			$field[] = "c.news_dynamic_no";
+			$field[] = "c.news_dynamic_title";
+			$field[] = "ifnull(c.news_dynamic_note, '') as news_dynamic_note";
+			$field[] = "ifnull(c.release_time, 0) as release_time";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$news["title"] = !empty($data["news_dynamic_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_title"])) : "";
+				$news["note"]  = !empty($data["news_dynamic_note"]) ? StringUtil::dbToHtml(EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_note"]))) : "";
+				$news["time"]  = !empty($data["release_time"]) ? date("Y-m-d", $data["release_time"]) : "-";
+				
+				$statutePic = new MtHelpPicModel();
+				list($picOne, $picTwo) = $statutePic->findHelpPicList($data["news_dynamic_no"]);
+				
+				if (!empty($picOne) && is_array($picOne)) {
+					$imgs = array();
+					
+					foreach ($picOne as $k1 => $pic) {
+						$imgs[] = ImgUtil::imgHandy($pic);
+					}
+					
+					$news["imgs"] = $imgs;
+				}
+			}
+		}
+		
+		return $news;
+	}
+	
+	public function getPaybillDetail($id) {
+		$news = array();
+	
+		if (!empty($id)) {
+			$where   = " c.news_dynamic_no = '".$id."' ";
+			
+			$field   = array();
+			$field[] = "c.news_dynamic_no";
+			$field[] = "c.news_dynamic_title";
+			$field[] = "ifnull(c.news_dynamic_note, '') as news_dynamic_note";
+			$field[] = "ifnull(c.release_time, 0) as release_time";
+			
+			$data = $this->where($where)->field($field)->find();
+			
+			if (!empty($data) && is_array($data)) {
+				$news["title"] = !empty($data["news_dynamic_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_title"])) : "";
+				$news["note"]  = !empty($data["news_dynamic_note"]) ? $data["news_dynamic_note"] : "";
+				$news["time"]  = !empty($data["release_time"]) ? date("Y-m-d", $data["release_time"]) : "-";
+			}
+		}
+		
+		return $news;
+	}
+	
+	public function getIntroDetail() {
+		$news = array();
+	
+		$where   = " c.type = '3' ";
+		
+		$field   = array();
+		$field[] = "c.news_dynamic_no";
+		$field[] = "c.news_dynamic_title";
+		$field[] = "ifnull(c.news_dynamic_note, '') as news_dynamic_note";
+		$field[] = "ifnull(c.release_time, 0) as release_time";
+		
+		$data = $this->where($where)->field($field)->find();
+		
+		if (!empty($data) && is_array($data)) {
+			$news["title"] = !empty($data["news_dynamic_title"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_title"])) : "";
+			$news["note"]  = !empty($data["news_dynamic_note"]) ? StringUtil::dbToHtml(EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["news_dynamic_note"]))) : "";
+			$news["time"]  = !empty($data["release_time"]) ? date("Y-m-d", $data["release_time"]) : "-";
+		}
+		
+		return $news;
+	}
+	
+	protected function newsType() {
+		$data = array();
+		
+		$data["1"] = "新闻";
+		$data["2"] = "动态";
+		$data["3"] = "简介";
+		$data["4"] = "法律";
+		
+		return $data;
+	}
+	
+}
+?>

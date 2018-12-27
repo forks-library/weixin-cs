@@ -1,0 +1,105 @@
+require(["weixin-normal", "page"], function(wx) {
+	et.fnWxShare = function() {
+		if (!et.isObject(wx) 
+				|| et.isNull(window._appId) 
+				|| et.isNull(window._nonceStr)
+				|| et.isNull(window._timestamp) 
+				|| et.isNull(window._signature)
+				|| et.isNull(window._wxShareUrl)
+				|| et.isNull(window._wxShrTitle)
+				|| et.isNull(window._wxShrDesc)) {
+			return;
+		}
+		
+		if (et.isTrue(window._wxNeedLoc)) {
+			var config = {
+				debug     : false
+				,appId    : window._appId
+				,timestamp: window._timestamp
+				,nonceStr : window._nonceStr
+				,signature: window._signature
+				,jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'getLocation']
+			};
+		} else {
+			var config = {
+				debug     : false
+				,appId    : window._appId
+				,timestamp: window._timestamp
+				,nonceStr : window._nonceStr
+				,signature: window._signature
+				,jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+			};
+		}
+		
+		wx.config(config);
+		
+		wx.ready(function() {
+			var title  = window._wxShrTitle;
+			var link   = window._wxShareUrl;
+			var imgUrl = 'http://mor-eyoo.img-cn-shenzhen.aliyuncs.com/cpm-com/dblb-newlogo.png';
+			var desc   = window._wxShrDesc;
+			
+			//分享到朋友圈
+			wx.onMenuShareTimeline({
+				title: title
+				,link: link
+				,imgUrl: imgUrl
+				,success: function () {
+//					alert("分享成功");
+				}
+				,cancel: function () {
+				}
+			});
+			
+			//分享给朋友
+			wx.onMenuShareAppMessage({
+				title: title
+				,desc: desc
+				,link: link
+				,imgUrl: imgUrl
+				,type: 'link'
+				,dataUrl: ''
+				,success: function () {
+//					alert("分享成功");
+				}
+				,cancel: function () {
+				}
+			});
+			
+			// 获取地理位置接口
+			wx.getLocation({
+				type: 'wgs84'
+				,success: function(res) {
+					window._wxLat = res.latitude;
+					window._wxLng = res.longitude;
+				}
+			});
+	    });
+		
+		wx.error(function(res) {
+			var str = '';
+			for (var i in res) {
+				str += i + " : " + res[i];
+			}
+			alert(str);
+		});
+	}
+	
+	$(function() {
+		if (!et.isNull(window._wxAuthUrl)) {
+			et.json(et.url("wxint/jsauth/apiKey"), function(json) {
+				if (et.jsonDecode.hasErr(json)) {
+				} else {
+					window._appId     = json.appId || '';
+					window._nonceStr  = json.nonceStr || '';
+					window._timestamp = json.timestamp || '';
+					window._signature = json.signature || '';
+					window._wxShrTitle = !et.isNull(window._wxShrTitle) ? window._wxShrTitle + ' 东莞便民信息网' : '东莞便民信息网';
+					window._wxShrDesc  = window._wxShrDesc || '东莞便民信息网邀你一起玩';
+					
+					et.fnWxShare();
+				}
+			}, {target_url: et.data.base64encode(location.href.split('#')[0])});
+		}
+	});
+});

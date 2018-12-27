@@ -1,0 +1,7 @@
+require(["template", "page", "lazyload", "swiper"], function(templateObj) {
+	$("#no").val(et.getQueryString('no'));
+	
+	if (et.loadingLayer && et.loadingLayer.initLoading) {
+		et.loadingLayer.initLoading.stop();
+	}
+});

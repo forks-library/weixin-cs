@@ -1,0 +1,28 @@
+var model = "";
+var modelRender = "";
+
+require(["template", "page", "lazyload", "swiper"], function(templateObj) {
+	model = et.template("salvorList.html");
+	templateObj.config("escape", false);
+	modelRender = templateObj.compile(model);
+	
+	$(".search-page-btn").off("tap").tap(function() {
+		var idCard = $(".search-cardnum-input").val();
+		
+		if (!et.isNull(idCard)) {
+			et.json(et.url("act/helpdata/dataResult"), function(json) {
+				if (et.jsonDecode.hasErr(json)) {
+					et.jsonDecode.showErr(json);
+				} else {
+					if (json.salvors) {
+						$(".seach-data").html(modelRender(json));
+					}
+				}
+			}, {idno: idCard});
+		}
+	});
+	
+	if (et.loadingLayer && et.loadingLayer.initLoading) {
+		et.loadingLayer.initLoading.stop();
+	}
+});

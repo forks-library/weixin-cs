@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta charset="utf-8" />
+    <title>图片分享</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script src="js/jquery.1.8.3.js"></script>
+    <script src="js/fastclick.js"></script>
+    <script src="js/inf.js"></script>
+    <script>
+        $(function () {
+            var innerWidth = window.innerWidth > 750 ? 750 : window.innerWidth;
+            document.documentElement.style.fontSize = innerWidth / 7.5 + 'px';
+            var order = getQueryString("order");
+            console.log(decodeURI(getQueryString("username")));
+            var username = decodeURIComponent(getQueryString("username"));
+
+
+            drawShareImage(order, username);
+        })
+
+
+        function drawShareImage(order, username) {
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext('2d');
+            //背景
+            var bg = new Image();
+            bg.src = "img/bg.jpg";
+            bg.onload = function () {
+                //背景上方颜色图片
+                var top = new Image();
+                top.src = "img/top.jpg";
+                top.onload = function () {
+                    var picInfo = imgDetail[order];
+                    var border = new Image();
+                    var borderStartX, borderStartY, pictureStartX, pictureStartY, pictureWidth, pictureHeight, borderWidth, borderHeight;
+
+                    if (picInfo.direction == "v") {
+                        //竖向画框
+                        border.src = "img/border1.png";
+                        borderStartX = 136;
+                        borderStartY = 86;
+                        borderWidth = 524;
+                        borderHeight = 660;
+                        pictureStartX = 200;
+                        pictureStartY = 150;
+                        pictureWidth = 350;
+                        pictureHeight = 482;
+
+                    }
+                    else {
+                        //横向画框
+                        border.src = "img/border2.png";
+                        borderStartX = 86;
+                        borderStartY = 162;
+                        borderWidth = 609;
+                        borderHeight = 484;
+                        pictureStartX = 152;
+                        pictureStartY = 232;
+                        pictureWidth = 428;
+                        pictureHeight = 300;
+                    }
+                    border.onload = function () {
+                        //图片
+                        var picture = new Image();
+                        picture.src = "img/pics/a" + picInfo.imgorder + ".jpg";
+                        picture.onload = function () {
+                            var des = new Image();
+
+                            //描述文字
+                            des.src = "img/des2.png";
+                            des.onload = function () {
+                                //绘制背景
+                                context.drawImage(bg, 0, 0, 750, 1334, 0, 0, 750, 1334);
+                                //绘制上方色块
+                                context.drawImage(top, 0, 0, 750, 497, 0, 0, 750, 497);
+                                //绘制作品
+                                context.drawImage(picture, 0, 0, pictureWidth, pictureHeight, pictureStartX, pictureStartY, pictureWidth, pictureHeight);
+                                //绘制边框
+                                context.drawImage(border, 0, 0, borderWidth, borderHeight, borderStartX, borderStartY, borderWidth, borderHeight);
+                                //绘制描述文字
+                                context.drawImage(des, 0, 0, 650, 160, 46, 812, 650, 160);
+                                //绘制作品题目
+                                var text = picInfo.title;
+                                context.fillStyle = "#434343";
+                                context.font = "42px Courier New";
+                                var textWidth = context.measureText(text).width;
+                                var offset = parseInt((750 - textWidth) / 2);
+                                context.fillText(text, offset, 780);
+                                context.font = "32px Courier New";
+                                context.fillText(username, 346, 842, 160);
+                                var img = document.createElement("img");
+                                img.src = canvas.toDataURL();
+                                img.setAttribute("class", "saveimg");
+
+                              //  $(".save").append(img);
+                              $("body").append(img);
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+
+
+        function getQueryString(name) {
+            var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+            if (result == null || result.length < 1) {
+                return "";
+            }
+            return result[1];
+        }
+
+
+        getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+
+        //调试
+        function log(t) {
+            //       return;
+            console.log(t);
+        }
+    </script>
+</head>
+<body>
+
+
+    <div class="share" style="z-index:100;display:block;">
+        <div class="canvas">
+            <canvas id="canvas" width="750" height="1334"></canvas>
+        </div>
+        <div class="save"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<?php
+namespace Share\Controller;
+use Com\Mor\Controller\WeixinController;
+use Com\Mor\Model\Weixin\WxUserResourceModel;
+
+class FootshareController extends WeixinController {
+	
+	public function __construct() {
+		$this->_pageJs = "index";
+		$this->slientWxAuth = false;
+		parent::__construct();
+		$this->assign("menu", "mepage");
+	}
+}
+?>

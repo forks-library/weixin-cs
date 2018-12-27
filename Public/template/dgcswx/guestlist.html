@@ -1,0 +1,25 @@
+{{if datas}}
+<ul class="donation-guestbook-ul bg-white inline-block">
+	{{each datas as guest i}}
+	<li>
+		<div class="guestbook-user-img">
+			<img src="{{guest.headImg}}" alt="" />
+		</div>
+		<div class="guestbook-cont">
+			<div class="guestbook-cont-head">
+				<div class="guest-username">{{guest.nickName}}&nbsp;
+					{{if guest.name}}
+					<span class="guest-turename">(真名：{{guest.name}})</span>
+					{{/if}}
+				</div>
+				<div class="guest-date">{{guest.releaseTime}}</div>
+			</div>
+			<div class="guest-article">{{guest.note}}</div>
+		</div>
+	</li>
+	{{/each}}
+</ul>
+<div class="guest-list-bottom">
+	<div class="guest-list-btn aclick-btn">点击留言</div>
+</div>
+{{/if}}

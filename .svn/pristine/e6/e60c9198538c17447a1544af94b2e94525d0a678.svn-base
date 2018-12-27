@@ -1,0 +1,136 @@
+<?php
+namespace Com\Mor\Model\Sys;
+use Com\Mor\Model\VersionModel;
+use Com\Mor\Util\EncodeUtil;
+use Com\Mor\Util\JsonUtil;
+use Com\Mor\Util\ImgUtil;
+use Com\Mor\Model\Sys\MtHelpInformationModel;
+use Com\Mor\Model\Weixin\WxUserResourceModel;
+
+class MtLeaveWordModel extends VersionModel {
+	
+	public function addLeaveWord($userId, $dataId, $note, $name) {
+		$blnSucc  = false;
+		
+		$dbData = array();
+		$dbData["user_wx_id"]    = $userId;
+		$dbData["help_code"]     = $dataId;  
+		$dbData["release_time"]  = time();
+		$dbData["name"]          = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($name));
+		$dbData["note"]          = EncodeUtil::dbUnicodeEncode(EncodeUtil::unicodeEncode($note));
+		$dbData["leave_word_no"] = $this->generateLeaveNo();
+	
+		try {
+			$this->startTrans();
+				
+			$id = $this->data($dbData)->add();
+			if ($id !== false) {
+				$this->commit();
+				$blnSucc = true;
+			} else {
+				$this->rollback();
+			}
+		} catch (\Exception $e) {
+			$this->rollback();
+			JsonUtil::response(JsonUtil::RET_SYSTEM_BUSY);
+		}
+		
+		return $blnSucc;
+	}
+	
+	protected function generateLeaveNo() {
+		$code = "530".$this->generateRandomTime(true, 10);
+		
+		if (!empty($code)) {
+			try {
+				$where = " c.leave_word_no = '".$code."' ";
+				$count = $this->where($where)->count();
+				
+				if (intval($count) > 0) {
+					$code = $this->generateLeaveNo();
+				}
+			} catch (\Exception $e) {
+				$code = "";
+			}
+		}
+		
+		return $code;
+	}
+	
+	public function getAllLeaves($dataId, $page = 1) {
+		$leaveWords = array();
+		
+		if (!empty($dataId)) {
+			$where   = " 1 = 1 and c.help_code = '".$dataId."' ";
+			
+			$field   = array();
+			$field[] = "c.".$this->getPk();
+			$field[] = "ifnull(c.note, '') as note ";
+			$field[] = "ifnull(c.name,'') as name";
+			$field[] = "c.release_time";
+			$field[] = "ifnull(wx.nick_name,'') as nick_name";
+			$field[] = "ifnull(wx.head_img_url,'') as head_img_url";
+			
+			$join = "left join wx_user_resource wx on wx.user_wx_id = c.user_wx_id";
+			
+			$this->join($join);
+			$total     = $this->countAll($where);
+	    	$totalPage = $this->countPage($total);
+
+	    	$this->setLimit($page);
+	    	$this->join($join);
+			$datas = $this->where($where)->order("release_time desc")->getField($field);
+			
+			if (!empty($datas) && is_array($datas)) {
+				foreach ($datas as $k1 => $data) {
+					$leaveWord = array();
+					$leaveWord["nickName"]    = !empty($data["nick_name"]) ? json_decode(html_entity_decode(EncodeUtil::dbUnicodeDecode($data["nick_name"]))): "";
+					$leaveWord["name"]        = !empty($data["name"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["name"])): "";
+					$leaveWord["headImg"]     = !empty($data["head_img_url"]) ? $data["head_img_url"] : "http://mor-eyoo.img-cn-shenzhen.aliyuncs.com/mor/101020170726162523264609.jpg";
+					$leaveWord["releaseTime"] = date("Y-m-d", $data["release_time"]);
+					$leaveWord["note"]        = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+					$leaveWords[] = $leaveWord;
+				}
+			}
+		}
+		
+		return $leaveWords;
+	}
+	
+	public function getTwoLeaves($dataId) {
+		$leaveWords = array();
+		
+		if (!empty($dataId)) {
+			$where   = " 1 = 1 and c.help_code = '".$dataId."' ";
+			
+			$field   = array();
+			$field[] = "c.".$this->getPk();
+			$field[] = "ifnull(c.note, '') as note ";
+			$field[] = "ifnull(c.name,'') as name";
+			$field[] = "c.release_time";
+			$field[] = "ifnull(wx.nick_name,'') as nick_name";
+			$field[] = "ifnull(wx.head_img_url,'') as head_img_url";
+			
+			$join = "left join wx_user_resource wx on wx.user_wx_id = c.user_wx_id";
+			
+	    	$this->join($join);
+			$datas = $this->where($where)->order("release_time desc")->limit("2")->getField($field);
+			
+			if (!empty($datas) && is_array($datas)) {
+				foreach ($datas as $k1 => $data) {
+					$leaveWord = array();
+					$leaveWord["nickName"]    = !empty($data["nick_name"]) ? json_decode(html_entity_decode(EncodeUtil::dbUnicodeDecode($data["nick_name"]))): "";
+					$leaveWord["name"]        = !empty($data["name"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["name"])): "";
+					$leaveWord["headImg"]     = !empty($data["head_img_url"]) ? $data["head_img_url"] : "http://mor-eyoo.img-cn-shenzhen.aliyuncs.com/mor/101020170726162523264609.jpg";
+					$leaveWord["releaseTime"] = date("Y-m-d", $data["release_time"]);
+					$leaveWord["note"]        = !empty($data["note"]) ? EncodeUtil::unicodeDecode(EncodeUtil::dbUnicodeDecode($data["note"])) : "";
+					$leaveWords[] = $leaveWord;
+				}
+			}
+		}
+		
+		return $leaveWords;
+	}
+	
+}
+?>

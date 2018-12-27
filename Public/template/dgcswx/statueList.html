@@ -1,0 +1,15 @@
+{{if datas}}
+{{each datas as statue i}}
+<li class="aclick-btn" data-url="et.redirect(et.url('info/aboutus/statutepage', {no: '{{statue.code}}'}));">
+	<div class="news-list-img">
+		<img class="width100 height100" src="{{statue.first}}" alt="" />
+	</div>
+	<div class="news-list-cont">
+		<div class="news-cont-title ellipsis ">{{statue.title}}</div>
+		<div class="news-cont-intro">{{statue.note}}</div>
+		<div class="news-cont-date">{{statue.time}}</div>
+		<div class="news-cont-btn color-white">详情</div>
+	</div>
+</li>
+{{/each}}
+{{/if}}

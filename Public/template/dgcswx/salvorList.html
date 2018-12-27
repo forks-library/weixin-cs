@@ -1,0 +1,11 @@
+{{if salvors}}
+<div>姓名：{{salvors.name}}</div>
+<div style="margin-top: 0.6rem;">救助原因：{{salvors.reason}}</div>
+{{each salvors.datas as salvor i}}
+<div style="margin-top: 0.6rem;">
+	<div style="float: left; margin-right: 0.8rem; min-width: 4rem; max-width: 6rem;">{{salvor.reliefTime}}</div>
+	<div style="float: left; margin-right: 0.8rem; min-width: 4rem; max-width: 6rem;">{{salvor.helpMoney}}</div>
+	<div style="float: left;">{{salvor.project}}</div>
+</div>
+{{/each}}
+{{/if}}

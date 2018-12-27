@@ -1,0 +1,43 @@
+<?php
+namespace Com\Mor\Util;
+
+class ImgSynUtil {
+	
+	public static function synthesisImg($amount, $imgUrl) {
+		header("Content-Type:text/html; charset=utf-8");
+        header('Content-type: image/jpg');
+		
+		$image = imagecreatefromjpeg($imgUrl);// 创建图像
+		// 填充颜色 - ps里的点击画布填色
+		$image_cololr =  imagecolorallocate($image, 149, 188, 205);
+		imagefill($image, 0, 0,$image_cololr);
+		$black = imagecolorallocate($image,  0, 0, 0);//文字颜色
+		$red   = imagecolorallocate($image,  255, 0, 0);//文字颜色
+		$text  = "并为有需要的人群捐赠了";
+		$yuan  = "元";
+		
+		$address = __ROOT__."Public/font/msyh.ttf";
+		
+		imagettftext($image, 16, 0, 180, 850, $black, $address, $text);// 设置中文文字
+		imagettftext($image, 16, 0, 181, 850, $black, $address, $text);// 设置中文文字
+		
+		imagettftext($image, 20, 0, 419, 850, $red, $address, $amount);// 设置中文文字
+		imagettftext($image, 20, 0, 420, 850, $red, $address, $amount);// 设置中文文字
+		imagettftext($image, 20, 0, 421, 850, $red, $address, $amount);// 设置中文文字
+		
+		if (strrpos($amount,"0",0) === false) {
+			$len = 1;
+		} else {
+			$len = strrpos($amount,"0",0);
+		}
+		
+		$strx = (421+10)+20*$len;
+		
+		imagettftext($image, 16, 0, $strx, 850, $black, "msyh.ttf", $yuan);// 设置中文文字
+		imagettftext($image, 16, 0, $strx+1, 850, $black, "msyh.ttf", $yuan);// 设置中文文字
+	    return	imagejpeg($image);// 生成图片
+//		imagedestroy($image);
+	}
+	
+}
+?>

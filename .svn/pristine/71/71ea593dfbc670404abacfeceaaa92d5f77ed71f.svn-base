@@ -1,0 +1,21 @@
+<include file="../../Tpl/header" />
+<!-- 没有数据时，隐藏封面 -->
+<section class="main-container block foot-full-bg" style="padding-top:0rem;padding-bottom:0rem; font-size:0px;">
+	<!--<div class="footshare-contect">
+		<div class="footshare-title">东莞信托第四届“与爱同行”公益徒步</div>
+		<div class="footshare-details">
+			<p>我参加了东莞信托第四届‘与爱同行’公益徒步</p>
+			<p>并为有需要的人群捐赠了<span class="footshare-money">200</span>元</p>
+			<p>请为公益慈善事业点赞吧！</p>
+		</div>
+	</div>
+	<div class="footshare-code">
+		<img class="width100 height100" src="http://mor-eyoo.img-cn-shenzhen.aliyuncs.com/mor/101020171220114755305874.png" alt="" />
+	</div> -->
+	<img class="width100" src="__PUBLIC__/images/8.jpg" alt="" />
+</section>
+<!-- 底部按钮 -->
+<!--include file="../../Tpl/footOther" /-->
+<include file="../../Tpl/js" />
+<include file="../../Tpl/footer" />
+

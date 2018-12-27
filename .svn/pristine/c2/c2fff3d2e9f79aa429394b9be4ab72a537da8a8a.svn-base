@@ -1,0 +1,87 @@
+<include file="../../Tpl/header" />
+<section class="main-container" style="padding-top:3.5rem; padding-bottom:7.5rem; font-size:0px;">
+	<!-- 头部 -->
+	<div class="pages-header width100">
+		<img class="cf-icon-logo" src="__PUBLIC__/images/cf-icon-logo.png" alt="">
+	</div>
+	<!-- banner图 -->
+	<div class="index-banner relative swipe">
+		<div class="index-banner-list swipe-wrap"></div>
+		<div class="detail-banner-num"></div>
+	</div>
+	<!-- 善款处理状况 -->
+	<ul class="donation-fund">
+		<li>
+			<div class="text-center color-white size-s charity-fund-son"><span class="color-white"><?php if (isset($amounts) && isset($amounts["tAmount"]) && !empty($amounts["tAmount"])) { echo $amounts["tAmount"]; } else { echo "-"; } ?></span>元</div>
+			<div class="text-center color-white size-l charity-fund-son">善款收入</div>
+		</li>
+		<li>
+			<div class="text-center color-white size-s charity-fund-son"><span class="color-white"><?php if (isset($amounts) && isset($amounts["eAmount"]) && !empty($amounts["eAmount"])) { echo $amounts["eAmount"]; } else { echo "-"; } ?></span>元</div>
+			<div class="text-center color-white size-l charity-fund-son">善款支出</div>
+		</li>
+		<li>
+			<div class="text-center color-white size-s charity-fund-son"><span class="color-white"><?php if (isset($amounts) && isset($amounts["lAmount"]) && !empty($amounts["lAmount"])) { echo $amounts["lAmount"]; } else { echo "-"; } ?></span>元</div>
+			<div class="text-center color-white size-l charity-fund-son">善款结余</div>
+		</li>
+	</ul>
+	<!-- 其他导航 -->
+	<ul class="other-nav">
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('info/aboutus/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-aboutme.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">关于我们</div>
+		</li>
+		<?php if (isset($topHelpType) && is_array($topHelpType)): ?>
+		<li class="aclick-btn width25 other-nav-special" data-url="et.redirect(et.url('user/donation/detail', {no: '<?php echo $topHelpType['code']; ?>'}));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-hpd.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center ellipsis_two"><?php echo $topHelpType['title']; ?></div>
+		</li>
+		<?php endif; ?>
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('user/donation/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-iwd.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">我要捐</div>
+		</li>
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('user/needhelp/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-inh.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">我要求助</div>
+		</li>
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('home/activity/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-caa.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">慈善活动申请</div>
+		</li>
+		<li class="width25 aclick-btn" data-url="et.redirect(et.url('user/volunteer/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-volunteer.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">志愿者服务</div>
+		</li>
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('info/paybill/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-ptb.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">晒账单</div>
+		</li>
+		<li class="aclick-btn width25" data-url="et.redirect(et.url('info/helpdata/index'));">
+			<div class="other-nav-img width100">
+				<img src="__PUBLIC__/images/cf-icon-helpdata.png" alt="">
+			</div>
+			<div class="other-nav-txt text-center">求助数据查询</div>
+		</li>
+	</ul>
+	<!-- 底部广告图 -->
+	<div class="footer-banner width100">
+		<img class="width100 height100" src="__PUBLIC__/images/cf-footer-banner.jpg" alt="">
+	</div>
+</section>
+<include file="../../Tpl/footMenu" />
+<include file="../../Tpl/js" />
+<include file="../../Tpl/footer" />

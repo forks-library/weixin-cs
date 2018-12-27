@@ -1,0 +1,5 @@
+{{if datas}}
+{{each datas as pay i}}
+<li class="aclick-btn bg-white ellipsis" data-url="et.redirect(et.url('info/paybill/paybilldetails', {no: '{{pay.code}}'}));">{{pay.title}}</li>
+{{/each}}
+{{/if}}

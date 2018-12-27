@@ -1,0 +1,16 @@
+{{if datas}}
+{{each datas as dynamic i}}
+<li class="aclick-btn" data-url="et.redirect(et.url('info/aboutus/charitablepage', {no: '{{dynamic.code}}'}));">
+	<div class="want-help-img">
+		<img class="width100 height100" src="{{dynamic.first}}" alt="">
+	</div>
+	<div class="want-help-cont relative">
+		<div class="want-help-title ellipsis">{{dynamic.title}}</div>
+		<div class="want-help-detail"></div>
+		<div class="wantdonate-list-bottom">
+			<div class="want-help-details-btn color-white">详情</div>
+		</div>
+	</div>
+</li>
+{{/each}}
+{{/if}}

@@ -1,0 +1,551 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta charset="utf-8" />
+    <title>童画——用画打开心窗，开启美妙童画世界</title>
+    <link href="style.css?v=36" rel="stylesheet" type="text/css" />
+    <script src="js/jquery.1.8.3.js"></script>
+    <script src="js/prefixfree.min.js"></script>
+    <script src="js/inf.js?v=36"></script>
+    <script>
+
+    </script>
+    <script>
+        var audio = new Audio();
+        var pausemusic = false;
+        var roll;
+        var show;
+        var imgList1 = [
+            'bg.jpg',
+            'top.jpg',
+            'title.png',
+            'title2.png',
+            'titlepoint.png',
+            'lg1.png',
+            'lg2.png',
+            'lg3.png',
+        ];
+        var imgList2 = [
+            'amountbg.png',
+            'amountbg_selected.png',
+            'arr.png',
+            'border1.png',
+            'border2.png',
+            'btnbuy.png',
+            'des2.png',
+            'join.png',
+            'pay.png',
+            'voice.png'
+        ]
+        var voicePlaying = false;
+        var currentPayAmount = 1;   //这里记录希望支付的金额，需验证
+        var currentIndex = 0;
+        var imgCount = 30;
+        var ratio = 1;
+        var currentOffset = 0;
+        var m;
+        $(function () {
+            var currentX = 0;
+            var offset = 0;
+            var innerWidth = window.innerWidth > 750 ? 750 : window.innerWidth;
+            document.documentElement.style.fontSize = innerWidth / 7.5 + 'px';
+            //加载封面动画
+            loadCoverImage();
+            renderlist();
+            createThumbList();
+            ratio = innerWidth / 750;
+            var imglist = document.getElementById("imglist");
+            var list = document.getElementById("list");
+            list.addEventListener("touchmove", function (e) { e.preventDefault(); }, false);
+            imglist.addEventListener("touchstart", function (e) {
+                currentX = e.touches[0].pageX;
+                imglist.addEventListener("touchmove", tmove, false);
+                imglist.addEventListener("touchend", tend, false);
+            }, false);
+            var nick = getQueryString("username");
+            // alert(nick);
+            localStorage.username = nick;
+            $(".arr_left").click(function () {
+                switchOtherPicture(true);
+            });
+            $(".arr_right").click(function () {
+                switchOtherPicture(false);
+            });
+            $(".thumb").on("click", ".item", function () {
+                //   alert("click");
+                clearTimeout(roll);
+                $(".thumb").stop();
+                currentIndex = parseInt($(this).data("order")) - 1;
+                fixposition();
+                $(".thumb").fadeOut();
+                setTimeout(function () {
+                    $(".list").fadeIn();
+                }, 200);
+
+            })
+            $(".return").on("click", function () {
+                $(".list").fadeOut();
+                $(".thumb").fadeIn();
+            })
+            function tmove(e) {
+                offset = e.touches[0].pageX - currentX;
+                $("#imglist").css("left", currentOffset + offset + "px");
+            }
+            function tend(e) {
+                currentOffset = parseInt($("#imglist").css("left").replace("px", ""));
+                if (Math.abs(offset) > 100) {
+                    if (offset > 0) {
+                        currentIndex -= 1;
+                        currentIndex = currentIndex < 0 ? 0 : currentIndex;
+                    }
+                    else {
+                        currentIndex += 1;
+                        currentIndex = currentIndex > imgCount - 1 ? imgCount - 1 : currentIndex;
+                    }
+                }
+                fixposition();
+                imglist.removeEventListener("touchmove", tmove, false)
+                imglist.removeEventListener("touchend", tend, false)
+                currentX = 0;
+                offset = 0;
+            }
+            $(".btnbuy").click(function () {
+                $(".list .arr_left").fadeOut();
+                $(".list .arr_right").fadeOut();
+                $(".list .title").fadeOut();
+                $(".list .description").fadeOut();
+                $(".list .btnbuy").fadeOut();
+                $(".pay").fadeIn();
+                $(".share").show();
+            });
+            m = document.getElementById("music");
+            $(".music").click(function () {
+                mPlay();
+            });
+
+            function audioAutoPlay(id) {
+                var audio = document.getElementById(id),
+                    play = function () {
+                        audio.play();
+                        document.removeEventListener("touchstart", play, false);
+                    };
+                audio.play();
+                document.addEventListener("WeixinJSBridgeReady", function () {
+                    play();
+                }, false);
+                document.addEventListener('YixinJSBridgeReady', function () {
+                    play();
+                }, false);
+                document.addEventListener("touchstart", play, false);
+            }
+            audioAutoPlay('music');
+
+
+
+            $(".paylist").find("li").click(function () {
+                $("#othernumber").val("");
+                currentPayAmount = $(this).html().replace("元", "");
+                $(this).siblings().removeClass("selected").end().addClass("selected");
+            })
+            $("#othernumber").on("change", function () {
+                $(".paylist li").removeClass("selected");
+                currentPayAmount = $("#othernumber").val();
+            })
+            var allowPayAction = true;//这里加锁，防止快速多次点击生成多个付款流程
+            var payUrl = "../wx-pay/example/jsapi.php";
+            $(".btnpay").click(function () {
+                console.log(111);
+                if (allowPayAction) {
+                    allowPayAction = false;
+                    //这里调用支付操作，支付完成后跳转执行下面的语句打开分享页面至分享页面
+                    console.log('金额：' + currentPayAmount);
+                    location.href = payUrl + "?total_fee=" + currentPayAmount + "&current_index=" + currentIndex;
+                    /*  $.post(payUrl,{"total_feel": currentPayAmount}).done(function(res){
+                         console.log(res);
+                     }); */
+                    /*  var paysuccess = true;
+                     if (paysuccess) {
+                         $(".list").hide();
+                         $(".pay").hide();
+                         drawShareImage(currentIndex);
+                         $(".share").show();
+                     }
+                     //这里是支付取消或者失败后的语句
+                     else {
+                         log("支付失败或取消，允许再次支付");
+                         allowPayAction = true;
+                     } */
+                }
+            })
+        })
+
+
+        function mPlay() {
+            if (m.paused) {
+                m.play();
+                pausemusic = false;
+                $(".music").addClass("music_on");
+            }
+            else {
+                m.pause();
+                pausemusic = true;
+                $(".music").removeClass("music_on");
+            }
+        }
+
+
+        function fixposition() {
+            //if (voicePlaying&&audio.play) {
+            //    audio.pause();
+            //}
+            $("#imglist").stop().animate({
+                left: -currentIndex * 7 * ratio * 100 + "px"
+            }, 200, function () {
+                currentOffset = parseInt($("#imglist").css("left").replace("px", ""));
+                changeDeatil();
+            });
+            playVoice();
+        }
+        function changeDeatil() {
+            $(".list .title").html(imgDetail[currentIndex].title);
+            //var fromcode = "";
+            //if (imgDetail[currentIndex].from == '') {
+
+            //}
+            //else {
+            //    fromcode = "&nbsp;&nbsp;&nbsp;&nbsp;机构：" + imgDetail[currentIndex].from;
+            //}
+            $(".list .pname").html("<span>" + imgDetail[currentIndex].name + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + imgDetail[currentIndex].age + "岁</span>");
+            $(".list .pdescription").html("" + imgDetail[currentIndex].description);
+        }
+        function renderlist() {
+            var code = "";
+            for (var i = 0; i < imgDetail.length; i++) {
+                if (imgDetail[i].direction == "h") {
+                    code += "  <div class='horizontal'><div class='horizontalimg'>";
+                    code += "<img src='img/pics/a" + imgDetail[i].imgorder + ".jpg' />";
+                    code += "</div><div class='voiceh' data-index='" + (i + 1) + "'></div></div >";
+                }
+                else {
+                    code += "  <div class='vertical'><div class='verticalimg'>";
+                    code += "<img src='img/pics/a" + imgDetail[i].imgorder + ".jpg' />";
+                    code += "</div><div class='voicev' data-index='" + (i + 1) + "'></div></div >";
+                }
+
+            }
+            $("#imglist").html(code);
+        }
+        function switchOtherPicture(left) {
+
+            if (left) {
+                if (currentIndex > 0) {
+                    currentIndex -= 1;
+                }
+                fixposition();
+            }
+            else {
+                if (currentIndex < imgCount - 1) {
+                    currentIndex += 1;
+                }
+                fixposition();
+            }
+        }
+
+        function drawShareImage(order) {
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext('2d');
+            //背景
+            var bg = new Image();
+            bg.src = "img/bg.jpg";
+            bg.onload = function () {
+                //背景上方颜色图片
+                var top = new Image();
+                top.src = "img/top.jpg";
+                top.onload = function () {
+                    var picInfo = imgDetail[order];
+                    var border = new Image();
+                    var borderStartX, borderStartY, pictureStartX, pictureStartY, pictureWidth, pictureHeight, borderWidth, borderHeight;
+
+                    if (picInfo.direction == "v") {
+                        //竖向画框
+                        border.src = "img/border1.png";
+                        borderStartX = 136;
+                        borderStartY = 86;
+                        borderWidth = 524;
+                        borderHeight = 660;
+                        pictureStartX = 200;
+                        pictureStartY = 150;
+                        pictureWidth = 350;
+                        pictureHeight = 482;
+
+                    }
+                    else {
+                        //横向画框
+                        border.src = "img/border2.png";
+                        borderStartX = 86;
+                        borderStartY = 162;
+                        borderWidth = 609;
+                        borderHeight = 484;
+                        pictureStartX = 152;
+                        pictureStartY = 232;
+                        pictureWidth = 428;
+                        pictureHeight = 300;
+                    }
+                    border.onload = function () {
+                        //图片
+                        var picture = new Image();
+                        picture.src = "img/pics/a" + picInfo.imgorder + ".jpg";
+                        picture.onload = function () {
+                            var des = new Image();
+
+                            //描述文字
+                            des.src = "img/des2.png";
+                            des.onload = function () {
+                                //绘制背景
+                                context.drawImage(bg, 0, 0, 750, 1334, 0, 0, 750, 1334);
+                                //绘制上方色块
+                                context.drawImage(top, 0, 0, 750, 497, 0, 0, 750, 497);
+                                //绘制作品
+                                context.drawImage(picture, 0, 0, pictureWidth, pictureHeight, pictureStartX, pictureStartY, pictureWidth, pictureHeight);
+                                //绘制边框
+                                context.drawImage(border, 0, 0, borderWidth, borderHeight, borderStartX, borderStartY, borderWidth, borderHeight);
+                                //绘制描述文字
+                                context.drawImage(des, 0, 0, 650, 160, 46, 812, 650, 160);
+                                //绘制作品题目
+                                var text = picInfo.title;
+                                context.fillStyle = "#434343";
+                                context.font = "42px Courier New";
+                                var textWidth = context.measureText(text).width;
+                                var offset = parseInt((750 - textWidth) / 2);
+                                context.fillText(text, offset, 780);
+                                context.font = "32px Courier New";
+                                var username = "测试一下比较长的名字"
+                                context.fillText(username, 346, 842, 160);
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        Array.prototype.indexOf = function (val) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == val) return i;
+            }
+            return -1;
+        };
+        Array.prototype.remove = function (val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
+
+        function loadCoverImage() {//封面图片预加载
+            var tmpList = imgList1;
+            var need = tmpList.length;
+            var loadedCount = 0;
+            var t1 = setInterval(function () {
+                var loopCount = 0;
+                for (var i = 0; i < tmpList.length; i++) {
+                    loopCount++;
+                    var img = new Image();
+                    img.src = "img/" + tmpList[i];
+                    if (img.complete) {
+                        loadedCount++;
+                        tmpList.remove(tmpList[i]);
+                    }
+                }
+                if (loadedCount == need) {
+                    coverAnimation();
+                    clearInterval(t1);
+                }
+            }, 500);
+        }
+        function coverAnimation() {
+            $(".cover .top").addClass("top_in");
+            $(".cover .title").addClass("title_in");
+            $(".cover .title2").addClass("title2_in");
+            $(".cover .titlepoint").addClass("titlepoint_in");
+            //$(".cover .logo1").addClass("logo_in");
+            //$(".cover .logo2").addClass("logo_in");
+            //$(".cover .logo3").addClass("logo_in");
+            //$(".cover .logo4").addClass("logo_in");
+            $(".lg1").addClass("lg_in");
+            $(".lg2").addClass("lg_in");
+            $(".lg3").addClass("lg_in");
+            //分段加载，封面动画结束后开始加载其它图片
+            setTimeout(function () {
+                $(".loadingtips").fadeIn();
+                loadOtherImage();
+            }, 4000);
+        }
+        function loadOtherImage() {//其它图片预加载
+            var tmpList = imgList2;
+            for (var i = 1; i <= imgCount; i++) {
+                tmpList.push('pics/a' + i + '.jpg')
+            }
+            var need = tmpList.length;
+            var loadedCount = 0;
+            var dotcount = 1;
+            var t1 = setInterval(function () {
+                var loopCount = 0;
+                dotcount = dotcount > 5 ? 1 : dotcount + 1;
+                $(".dot").html("......".substring(0, dotcount));
+                for (var i = 0; i < tmpList.length; i++) {
+                    loopCount++;
+                    var img = new Image();
+                    img.src = "img/" + tmpList[i];
+                    if (img.complete) {
+                        loadedCount++;
+                        tmpList.remove(tmpList[i]);
+                    }
+                }
+                if (loadedCount == need) {
+                    clearInterval(t1);
+                    $(".loadingtips").html("加载完成，正在进入");
+                    setTimeout(function () {
+                        $(".cover").fadeOut();
+                        $(".thumb").fadeIn();
+                        //   $(".list").fadeIn();
+                        //$(".thumb").fadeIn();
+                        //roll = setTimeout(function () {
+                        //    $(".thumb").animate({
+                        //        scrollTop: $(".thumblist").height() - innerHeight
+                        //    }, 30000, function () {
+                        //        $(".thumb").fadeOut();
+                        //        $(".list").fadeIn();
+                        //    });
+                        //}, 2000);
+                    }, 1000);
+                }
+            }, 500);
+        }
+        function createThumbList() {
+            var cod = "<div class='thumblist'>";
+            for (var i = 0; i < imgDetail.length; i++) {
+                cod += "<div class='item' data-order='" + imgDetail[i].imgorder + "'><div class='thumb_img " + imgDetail[i].direction + "'><img src='img/pics/a" + imgDetail[i].imgorder + ".jpg' /></div><div class='thumb_text'><div class='thumb_title'>" + imgDetail[i].title + "</div><div class='thumb_description'>" + imgDetail[i].name + "&nbsp;&nbsp;&nbsp;" + imgDetail[i].age + "岁</div></div></div>"
+            }
+            cod += "</div>";
+            $(".thumb").html(cod);
+        }
+        function getQueryString(name) {
+            var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+            if (result == null || result.length < 1) {
+                return "";
+            }
+            return result[1];
+        }
+        //调试
+        function log(t) {
+            //       return;
+            console.log(t);
+        }
+    </script>
+</head>
+<body>
+    <div class="music music_on"></div>
+    <audio id="music" src="music/m2.mp3" loop="loop" preload autoplay></audio>
+    <div class="cover">
+        <div class="top"></div>
+        <div class="title">
+            <div class="titlepoint"></div>
+        </div>
+        <div class="title2"></div>
+        <div class="loadingtips"><span>加载中</span><span class="dot">.</span></div>
+        <!--<div class="logo1"></div>
+        <div class="logo2"></div>
+        <div class="logo3"></div>
+        <div class="logo4"></div>-->
+        <div class="lg1"></div><div class="lg2"></div><div class="lg3"></div>
+    </div>
+    <div class="thumb" style="display:none;">
+
+    </div>
+    <div class="list" id="list" style="display:none;">
+        <!--<div class="logo">
+        <div class="logo1"></div>
+        <div class="logo2"></div>
+        <div class="logo3"></div>
+        <div class="logo4"></div>
+    </div>-->
+        <div class="return">返回</div>
+        <div class="picturelist">
+            <div class="imglist" id="imglist">
+            </div>
+        </div>
+        <div class="arr_left"> </div>
+        <div class="arr_right"> </div>
+        <div class="title">《我为梵高画像》</div>
+        <div class="description">
+            <p class="pname">作者：钱盼盼&nbsp;&nbsp;&nbsp;&nbsp;11岁</p>
+            <p class="pdescription">听说梵高是一位艺术家，我画的是这位艺术家。这位艺术家在抽烟，他在看着我。</p>
+        </div>
+        <div class="btnbuy"></div>
+    </div>
+    <div class="pay">
+        <div class="paylist">
+            <ul>
+                <li class="selected">1元</li>
+                <li>10元</li>
+                <li>20元</li>
+                <li>50元</li>
+                <li>100元</li>
+                <li>200元</li>
+            </ul>
+        </div>
+        <div class="other">
+            其它金额：<input type="number" id="othernumber" />
+        </div>
+        <div class="btnpay"></div>
+    </div>
+    <div class="share" style="display:none;">
+        <div class="canvas">
+            <canvas id="canvas" width="750" height="1334"></canvas>
+        </div>
+        <div class="join"></div>
+    </div>
+    <script>
+        $(function () {
+
+            //播放音乐
+            log("start voice control");
+
+            $(document).on('touchstart', '.voiceh,.voicev', function () {
+                log(audio);
+                if (audio.ended) {
+                    voicePlaying = false;
+                }
+                if (voicePlaying) {
+                    log("audio playing");
+                    audio.pause();
+                    voicePlaying = false;
+                    log("audio pause");
+                    if (!pausemusic) {
+                        mPlay();
+                    }
+                }
+                else {
+                    log("play audio");
+                    m.pause();
+                    $(".music").removeClass("music_on");
+                    voicePlaying = true;
+                    var audioSrc = "m" + $(this).attr('data-index') + '.MP3';
+                    audio.src = 'voice/' + audioSrc;
+                    audio.play();
+                }
+
+            })
+
+        })
+
+        function playVoice() {
+            // $(".list").find(".voiceh,.voicev").eq(currentIndex).trigger("touchstart");
+        }
+    </script>
+</body>
+
+</html>

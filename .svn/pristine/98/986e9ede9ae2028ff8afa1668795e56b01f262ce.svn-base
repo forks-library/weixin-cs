@@ -1,0 +1,42 @@
+<?php
+namespace Home\Controller;
+use Com\Mor\Controller\WeixinController;
+use Com\Mor\Model\Sys\MtHelpInformationModel;
+use Com\Mor\Model\Sys\MtBanModel;
+use Com\Mor\Model\Sys\MtMissionAmountModel;
+use Com\Mor\Util\JsonUtil;
+
+class IndexController extends WeixinController {
+	
+	public function __construct() {
+		$this->_pageJs = "index2";
+		parent::__construct();
+		$this->assign("menu", "homepage");
+	}
+	
+	public function index() {
+		if (I("get.infoNo") != null && !empty(I("get.infoNo"))) {
+			$infoNo = I("get.infoNo");
+			redirect(U("/user/donation/footPayAction?id=".$this->wxUserId."&infoNo=".$infoNo));
+		    exit();
+		} else {
+			$mtHelpInformationModel = new MtHelpInformationModel();
+			$topHelpType = $mtHelpInformationModel->getTopHelpInfo();
+		
+			if (!empty($topHelpType) && is_array($topHelpType)) {
+				$this->assign("topHelpType", $topHelpType);
+			}
+			
+			$mtMissionAmountModel = new MtMissionAmountModel();
+			$amounts = $mtMissionAmountModel->getTotalAmount();
+			
+			if (!empty($amounts) && is_array($amounts)) {
+				$this->assign("amounts", $amounts);
+			}
+			
+			$this->display();
+		}
+		
+	}
+	
+}
